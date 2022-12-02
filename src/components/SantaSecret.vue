@@ -40,6 +40,8 @@ export default {
                 { id: 5, name: 'Victoria', illegal: 3, status: 'default', pair: null},
                 { id: 6, name: 'Axelle', illegal: 7, status: 'default', pair: null},
                 { id: 7, name: 'Marco', illegal: 6, status: 'default', pair: null},
+                { id: 8, name: 'Marcellin', illegal: 9, status: 'default', pair: null},
+                { id: 9, name: 'Léa 2', illegal: 8, status: 'default', pair: null},
             ],
             pairToDisplay: null,
             showSnowGlobe: false
@@ -52,7 +54,7 @@ export default {
                     if(!this.findPair(participant)){
                         this.resetSecretSanta()
                     }
-                    else if(index === 7) { // Good and last one
+                    else if(index === 9) { // Good and last one
                         console.log('finished')
                         this.saveToLocalStorage();
                     }
@@ -136,6 +138,10 @@ export default {
     position: relative;
     overflow: hidden;
 
+    @media (max-width: 600px) {
+        overflow-y: scroll;
+    }
+
 }
 .tree {
     width: 500px;
@@ -161,7 +167,7 @@ export default {
 .ss-container {
     margin-top: 7%;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     grid-gap: 50px;
 
     width: 55%;
@@ -173,6 +179,9 @@ export default {
     @media (max-width: 600px) {
         width: 90%;
         grid-gap: 30px;
+        margin-top: 200px;
+        padding-bottom: 50px;
+        padding-top: 30px;
 
         // Disable hover on mobile
         .participant-container:hover {
@@ -182,7 +191,6 @@ export default {
 
     @media (max-width: 450px) {
         grid-template-columns: repeat(2, 1fr);
-        margin-top: 0;
     }
 }
 
