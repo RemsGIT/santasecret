@@ -169,6 +169,21 @@ export default {
     .ss-participant {
         z-index: 10;
     }
+
+    @media (max-width: 600px) {
+        width: 90%;
+        grid-gap: 30px;
+
+        // Disable hover on mobile
+        .participant-container:hover {
+            transform: unset !important;
+        }
+    }
+
+    @media (max-width: 450px) {
+        grid-template-columns: repeat(2, 1fr);
+        margin-top: 0;
+    }
 }
 
 .snowball-enter-active,
