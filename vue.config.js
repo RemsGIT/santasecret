@@ -8,7 +8,7 @@ module.exports = defineConfig({
       start_url: "./",
       display: "standalone",
       theme_color: "#510001",
-      background_color: "#510001";
+      background_color: "#510001",
       icons: [
         {
           src: "./img/icons/santa-icon-50x50.png",
