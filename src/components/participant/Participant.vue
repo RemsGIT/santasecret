@@ -1,6 +1,7 @@
 <template>
-    <div :class="`participant-container ${participant.status}`" @click="discoverPair(participant)">
+    <div :class="`participant-container ${participant.status}`" @click="discoverPair">
         <p>{{participant.name}}</p>
+
     </div>
 </template>
 
@@ -12,11 +13,16 @@ export default {
             type: Object,
             required: true
         },
+        pair: {
+            type: Object,
+            required: false
+        },
     },
     methods: {
-        discoverPair(participant){
-            if(participant.status !== 'disabled') {
-                this.$emit('discoverPair', participant)
+        discoverPair(){
+            if(this.participant.status !== 'disabled') {
+                this.showSnowGlobe = true
+                this.$emit('discovered', this.participant)
             }
         }
     }
@@ -25,16 +31,30 @@ export default {
 
 <style scoped lang="scss">
     .participant-container {
-        border: 1px solid gray;
-        padding-top: 20px;
-        padding-bottom: 20px;
-        border-radius: 10px;
+        border: 1px solid white;
+
+        border-radius: 30px;
         cursor: pointer;
+        color: black;
+        background-color: #fff;
+        transition: .3s;
+
+
+        &:hover:not(.disabled){
+            transform: scale(1.2);
+        }
 
         &.disabled {
-            color: #ffffff;
-            background-color: #9f9f9f;
+            color: gray;
+            border-color: gray;
+            background-color: transparent ;
             cursor: not-allowed;
+        }
+
+        p {
+            font-size: 40px;
+            font-weight: 900;
+            font-family:'Mountains of Christmas' ;
         }
     }
 </style>
