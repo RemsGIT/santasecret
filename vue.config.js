@@ -27,5 +27,7 @@ module.exports = defineConfig({
         },
       ],
     },
+    theme_color: "#510001",
+
   },
 });
