@@ -10,7 +10,6 @@
         <img class="tree left" src="../../public/img/app/tree.png" alt="">
         <img class="tree right" src="../../public/img/app/tree.png" alt="">
 
-        <button @click="resetSecretSanta" v-show="true">reset</button>
 
         <Transition name="snowball">
             <snow-globe :name="pairToDisplay" v-if="showSnowGlobe" @closeSnowball="handleCloseSnowball"/>
