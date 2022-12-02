@@ -20,7 +20,7 @@ module.exports = defineConfig({
           type: "image/png",
         },
         {
-          src: "./img/icons/santa-icon-100x100.png",
+          src: "./img/icons/santa-icon-144x144.png",
           sizes: "144x144",
           type: "image/png",
         },
