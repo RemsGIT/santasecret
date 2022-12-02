@@ -3,8 +3,8 @@ module.exports = defineConfig({
   transpileDependencies: true,
   pwa: {
     manifestOptions: {
-      name: "SANTA SECRET - 2022",
-      start_url: "./",
+      name: "SANTA SECRET",
+      short_name: "",
       display: "standalone",
       theme_color: "#510001",
       background_color: "#510001",
