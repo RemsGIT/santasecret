@@ -18,7 +18,12 @@ module.exports = defineConfig({
           src: "./img/icons/santa-icon-100x100.png",
           sizes: "100x100",
           type: "image/png",
-        }
+        },
+        {
+          src: "./img/icons/santa-icon-100x100.png",
+          sizes: "144x144",
+          type: "image/png",
+        },
       ],
     },
   },
