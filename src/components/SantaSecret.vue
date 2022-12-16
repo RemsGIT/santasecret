@@ -6,7 +6,7 @@
                 <Participant @discovered="handleDiscovered" :participant="participant" :pair="participant.pair !== null ? participants.find(p => p.id === participant.pair) : null"/>
             </div>
         </div>
-        <button @click="resetSecretSanta" style="display: none"> RESET </button>
+        <button @click="resetSecretSanta" v-show="false"> RESET </button>
         <img class="tree left" src="../../public/img/app/tree.png" alt="">
         <img class="tree right" src="../../public/img/app/tree.png" alt="">
 
@@ -32,29 +32,27 @@ export default {
     data () {
         return {
             participants : [
-                { id: 0, name: 'Rémy', illegal: 1, status: 'default', pair: null},
-                { id: 1, name: 'Aurélie', illegal: 0, status: 'default', pair: null},
-                { id: 2, name: 'Alexis', illegal: 4, status: 'default', pair: null},
-                { id: 3, name: 'Matteo', illegal: 5, status: 'default', pair: null},
-                { id: 4, name: 'Léa', illegal: 2, status: 'default', pair: null},
-                { id: 5, name: 'Victoria', illegal: 3, status: 'default', pair: null},
-                { id: 6, name: 'Axelle', illegal: 7, status: 'default', pair: null},
-                { id: 7, name: 'Marco', illegal: 6, status: 'default', pair: null},
-                { id: 8, name: 'Marcellin', illegal: 9, status: 'default', pair: null},
-                { id: 9, name: 'Léa 2', illegal: 8, status: 'default', pair: null},
+                { id: 0, name: 'Rémy', illegal: [1], status: 'default', pair: null},
+                { id: 1, name: 'Aurélie', illegal: [0], status: 'default', pair: null},
+                { id: 2, name: 'Alexis', illegal: [4], status: 'default', pair: null},
+                { id: 3, name: 'Matteo', illegal: [5], status: 'default', pair: null},
+                { id: 4, name: 'Léa', illegal: [2, 5], status: 'default', pair: null},
+                { id: 5, name: 'Victoria', illegal: [3, 4], status: 'default', pair: null},
+                { id: 6, name: 'Axelle', illegal: [7], status: 'default', pair: null},
+                { id: 7, name: 'Marco', illegal: [6], status: 'default', pair: null},
             ],
             pairToDisplay: null,
             showSnowGlobe: false
         }
     },
     methods: {
-        findPairAuto(){
+        findPairAuto(){ // Search the solution recursively
             if(!localStorage.getItem('participants')) {
                 this.participants.forEach((participant,index) => {
                     if(!this.findPair(participant)){
                         this.resetSecretSanta()
                     }
-                    else if(index === 9) { // Good and last one
+                    else if(index === 7) { // Good and last one
                         console.log('finished')
                         this.saveToLocalStorage();
                     }
@@ -62,9 +60,9 @@ export default {
             }
         },
         findPair(participant) {
-            // Get all available participants
+            // Get all available participants and remove their illegal
             let available = this.participants
-            available = available.filter(p => p.id !== participant.id && p.id !== participant.illegal);
+            available = available.filter(p => p.id !== participant.id && !participant.illegal.includes(p.id));
 
             // Find the pairs and remove them --> two persons can't give a gift to the same person
             this.participants.forEach(element => {
@@ -162,7 +160,7 @@ export default {
 }
 .garland {
     position: absolute;
-    top: 20px;
+    top: 100px;
 }
 .ss-container {
     margin-top: 7%;
