@@ -42,9 +42,11 @@ export default {
 <style scoped lang="scss">
 
 .participant-container p {
-    opacity: 0.07;
+    opacity: 0.06;
     font-size: 30px;
     transition: all .5s;
+    font-family: 'Harry Potter', sans-serif;
+    user-select: none !important;
 
     &.revealed {
         opacity: 1;
@@ -54,11 +56,16 @@ export default {
         opacity: 1;
         color: black;
     }
+}
 
+.participant-container {
     &.disabled {
-        opacity: 1;
-        color: gray;
-        cursor: not-allowed;
+        .name_txt {
+            opacity: 1;
+            color: black !important;
+            cursor: not-allowed;
+        }
+
     }
 }
 </style>

@@ -86,8 +86,8 @@ export default {
             }
         },
         handleDiscovered(value){
-            //this.participants.find(p => p.id === value.id).status = 'disabled'
-
+            this.participants.find(p => p.id === value.id).status = 'disabled'
+            
             this.pairToDisplay = this.participants.find(p => p.id === value.pair).name
             this.participantNameClicked = value.name
             this.showSnowGlobe =  true;
