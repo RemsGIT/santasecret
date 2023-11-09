@@ -1,7 +1,12 @@
 <template>
-    <div :class="`participant-container ${participant.status}`" @click="discoverPair">
-        <p>{{participant.name}}</p>
-
+    <div
+        :class="`participant-container ${participant.status}`"
+        @click="discoverPair"
+        ref="participantBox"
+    >
+        <div class="name_container" ref="participantBox">
+            <p class="name_txt" :class="{ 'revealed': isTextRevealed }">{{ participant.name }}</p>
+        </div>
     </div>
 </template>
 
@@ -16,33 +21,44 @@ export default {
         pair: {
             type: Object,
             required: false
-        },
+        }
+    },
+    data() {
+        return {
+            isTextRevealed: false
+        };
     },
     methods: {
-        discoverPair(){
-            if(this.participant.status !== 'disabled') {
-                this.showSnowGlobe = true
-                this.$emit('discovered', this.participant)
+        discoverPair() {
+            if (this.participant.status !== 'disabled') {
+                this.showSnowGlobe = true;
+                this.$emit('discovered', this.participant);
             }
-        }
+        },
     }
 };
 </script>
 
 <style scoped lang="scss">
-    .participant-container p{
+
+.participant-container p {
+    opacity: 0.07;
+    font-size: 30px;
+    transition: all .5s;
+
+    &.revealed {
         opacity: 1;
-        transition: 1s ease-in-out;
-        font-size: 50px;
-        
-        &:hover {
-            opacity: 1;
-        }
-        
-        &.disabled {
-            opacity: 1;
-            color: gray;
-            cursor: not-allowed;
-        }
     }
+
+    &:hover {
+        opacity: 1;
+        color: black;
+    }
+
+    &.disabled {
+        opacity: 1;
+        color: gray;
+        cursor: not-allowed;
+    }
+}
 </style>

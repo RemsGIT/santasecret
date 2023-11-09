@@ -1,30 +1,27 @@
 <template>
-    <div class="wrapper">
+    <div class="wrapper" @mousemove="trackMouse">
+        <div class="torch" :style="torchStyle" :class="{hideTorch: showSnowGlobe}"></div>
+        <Transition name="snowball">
+            <marauders-map :clicked-name="participantNameClicked" :name="pairToDisplay" v-if="showSnowGlobe" @closeSnowball="handleCloseSnowball" />
+        </Transition>
+        
         <div class="ss-container">
             <div class="ss-participant" v-for="participant in participants" v-bind:key="participant.id">
                 <Participant @discovered="handleDiscovered" :participant="participant" :pair="participant.pair !== null ? participants.find(p => p.id === participant.pair) : null"/>
             </div>
         </div>
         <button @click="resetSecretSanta" v-show="false"> RESET </button>
-        <img class="tree left" src="../../public/img/app/tree.png" alt="">
-        <img class="tree right" src="../../public/img/app/tree.png" alt="">
-
-
-        <Transition name="snowball">
-            <snow-globe :name="pairToDisplay" v-if="showSnowGlobe" @closeSnowball="handleCloseSnowball"/>
-        </Transition>
-
     </div>
 </template>
 
 <script>
 import Participant from "@/components/participant/Participant";
-import Snowglobe from "@/components/snowglobe/Snowglobe";
+import MaraudersMap from "@/components/maraudersMap/MaraudersMap.vue";
 export default {
     name: "SantaSecret",
     components: {
         Participant,
-        'snow-globe': Snowglobe
+        'marauders-map': MaraudersMap
     },
     data () {
         return {
@@ -38,8 +35,12 @@ export default {
                 { id: 6, name: 'Axelle', illegal: [7], status: 'default', pair: null},
                 { id: 7, name: 'Marco', illegal: [6], status: 'default', pair: null},
             ],
+            participantNameClicked: null,
             pairToDisplay: null,
-            showSnowGlobe: false
+            showSnowGlobe: false,
+            mouseX: 0,
+            mouseY: 0,
+            isTracking: false
         }
     },
     methods: {
@@ -85,10 +86,10 @@ export default {
             }
         },
         handleDiscovered(value){
-            this.participants.find(p => p.id === value.id).status = 'disabled'
+            //this.participants.find(p => p.id === value.id).status = 'disabled'
 
             this.pairToDisplay = this.participants.find(p => p.id === value.pair).name
-
+            this.participantNameClicked = value.name
             this.showSnowGlobe =  true;
             this.saveToLocalStorage()
         },
@@ -118,12 +119,25 @@ export default {
                 const windowWidth = window.innerWidth;
                 const windowHeight = window.innerHeight;
 
-                const randomLeft = Math.random() * (windowWidth - 100); // 100 peut être remplacé par la largeur de votre participant
-                const randomTop = Math.random() * (windowHeight - 100); // 100 peut être remplacé par la hauteur de votre participant
+                const randomLeft = Math.random() * (windowWidth - 100);
+                const randomTop = Math.random() * (windowHeight - 100);
 
                 participant.style.left = `${randomLeft}px`;
                 participant.style.top = `${randomTop}px`;
             });
+        },
+        trackMouse(event) {
+            this.mouseX = event.pageX - 100; // Ajuster selon la taille de la lampe torche pour la centrer
+            this.mouseY = event.pageY - 100; // Ajuster selon la taille de la lampe torche pour la centrer
+        },
+        
+    },
+    computed: {
+        torchStyle() {
+            return {
+                top: this.mouseY + 'px',
+                left: this.mouseX + 'px'
+            };
         }
     },
     beforeMount() { // Get data of localStorage if exists
@@ -149,67 +163,20 @@ export default {
     justify-content: center;
     align-items: center;
     height: 100%;
+    width: 100%;
     flex-direction: column;
-
     position: relative;
-    overflow: hidden;
-
-    @media (max-width: 600px) {
-        overflow-y: scroll;
-    }
-
-}
-.tree {
-    width: 500px;
-    position: absolute;
-    z-index: 0;
-
-    &.left{
-        left: -180px;
-        bottom: -100px;
-    }
-    &.right{
-        width: 550px;
-        right: -180px;
-        bottom: -40px;
-    }
-
-
-}
-.garland {
-    position: absolute;
-    top: 100px;
+    //overflow: hidden;
 }
 .ss-container {
-    margin-top: 7%;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-gap: 50px;
-    
     .ss-participant {
         position: absolute;
         z-index: 10;
         width: 100px;
+        height: 34.5px;
     }
-
-    @media (max-width: 600px) {
-        width: 90%;
-        grid-gap: 30px;
-        margin-top: 200px;
-        padding-bottom: 50px;
-        padding-top: 30px;
-
-        // Disable hover on mobile
-        .participant-container:hover {
-            transform: unset !important;
-        }
-    }
-
-    @media (max-width: 450px) {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    
 }
-
 .snowball-enter-active,
 .snowball-leave-active {
     transition: opacity 0.3s ease;
@@ -218,5 +185,20 @@ export default {
 .snowball-enter-from,
 .snowball-leave-to {
     opacity: 0;
+}
+
+// torch
+.torch {
+    position: absolute;
+    width: 200px;
+    height: 200px;;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    z-index: 9999;
+}
+.hideTorch {
+    display: none;
 }
 </style>

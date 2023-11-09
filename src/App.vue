@@ -1,4 +1,7 @@
 <template>
+    
+    <h1 class="find_name_title">Trouve ton nom</h1>
+    
     <santa-secret />
     
     <foots-walking/>
@@ -18,16 +21,31 @@ export default {
 </script>
 
 <style lang="scss">
-html,body{
-    height:100%;
-    margin: 0;
-    background-color: red;
-}
-#app {
-    background: url("https://img00.deviantart.net/5088/i/2013/171/5/5/the_back_of_the_marauders_map_by_littlefallingstar-d69tz1k.jpg");
+html,
+body {
     height: 100%;
-    cursor: url(http://imageshack.com/a/img922/6285/gC18h6.png),auto;
+    width: 100%;
+    margin: 0;
+    background-color: black;
     overflow: hidden;
 }
 
+#app {
+    background: url("https://img00.deviantart.net/5088/i/2013/171/5/5/the_back_of_the_marauders_map_by_littlefallingstar-d69tz1k.jpg");
+    height: 100%;
+    width: 100%;
+    cursor: url("../public/img/app/cursor_hp.png"), pointer;
+    /* overflow: hidden; */ /* Retirer cette ligne pour permettre le bon fonctionnement du curseur sur toute la page */
+    position: relative;
+}
+
+.find_name_title {
+    font-size: 70px;
+    position: absolute;
+    font-family: 'Harry Potter', sans-serif;
+    letter-spacing: 5px;
+    text-align: center;
+    left: 50%;
+    transform: translateX(-50%);
+}
 </style>

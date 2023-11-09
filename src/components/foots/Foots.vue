@@ -874,7 +874,7 @@ export default {
 #foots_container {
     position: absolute;
     top: 50%;
-    left: 40%;
+    left: 50%;
     transform: translate(-50%, -50%);
 }
 
