@@ -30,31 +30,19 @@ export default {
 </script>
 
 <style scoped lang="scss">
-    .participant-container {
-        border: 1px solid white;
-
-        border-radius: 30px;
-        cursor: pointer;
-        color: black;
-        background-color: #fff;
-        transition: .3s;
-
-
-        &:hover:not(.disabled){
-            transform: scale(1.2);
+    .participant-container p{
+        opacity: 1;
+        transition: 1s ease-in-out;
+        font-size: 50px;
+        
+        &:hover {
+            opacity: 1;
         }
-
+        
         &.disabled {
+            opacity: 1;
             color: gray;
-            border-color: gray;
-            background-color: transparent ;
             cursor: not-allowed;
-        }
-
-        p {
-            font-size: 40px;
-            font-weight: 900;
-            font-family:'Mountains of Christmas' ;
         }
     }
 </style>

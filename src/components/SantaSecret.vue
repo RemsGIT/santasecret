@@ -1,6 +1,5 @@
 <template>
     <div class="wrapper">
-        <Garland class="garland top"/>
         <div class="ss-container">
             <div class="ss-participant" v-for="participant in participants" v-bind:key="participant.id">
                 <Participant @discovered="handleDiscovered" :participant="participant" :pair="participant.pair !== null ? participants.find(p => p.id === participant.pair) : null"/>
@@ -20,13 +19,11 @@
 
 <script>
 import Participant from "@/components/participant/Participant";
-import Garland from "@/components/garland/Garland";
 import Snowglobe from "@/components/snowglobe/Snowglobe";
 export default {
     name: "SantaSecret",
     components: {
         Participant,
-        Garland,
         'snow-globe': Snowglobe
     },
     data () {
@@ -114,6 +111,20 @@ export default {
 
             this.findPairAuto();
         },
+        positionParticipantsRandomly() {
+            const participants = document.querySelectorAll('.ss-participant');
+
+            participants.forEach(participant => {
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+
+                const randomLeft = Math.random() * (windowWidth - 100); // 100 peut être remplacé par la largeur de votre participant
+                const randomTop = Math.random() * (windowHeight - 100); // 100 peut être remplacé par la hauteur de votre participant
+
+                participant.style.left = `${randomLeft}px`;
+                participant.style.top = `${randomTop}px`;
+            });
+        }
     },
     beforeMount() { // Get data of localStorage if exists
         if(localStorage.getItem('participants')) {
@@ -121,6 +132,13 @@ export default {
         }
 
         this.findPairAuto();
+    },
+    mounted() {
+        this.positionParticipantsRandomly(); // Positionnement initial aléatoire au chargement
+        window.addEventListener('resize', this.positionParticipantsRandomly); // Réajustement en cas de redimensionnement de la fenêtre
+    },
+    beforeUnmount() {
+        window.removeEventListener('resize', this.positionParticipantsRandomly); // Nettoyage de l'écouteur d'événement
     }
 };
 </script>
@@ -167,11 +185,11 @@ export default {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-gap: 50px;
-
-    width: 55%;
-
+    
     .ss-participant {
+        position: absolute;
         z-index: 10;
+        width: 100px;
     }
 
     @media (max-width: 600px) {
