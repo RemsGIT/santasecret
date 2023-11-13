@@ -75,11 +75,9 @@ export default {
     methods: {
         clickStartAnimation() {
             this.startAnimation = true
+
+            setTimeout(() => this.showName = true, 15000)
         }
-    },
-    mounted() {
-        // Snowglobe displayed
-        setTimeout(() => this.showName = true, 17000)
     }
 };
 </script>
