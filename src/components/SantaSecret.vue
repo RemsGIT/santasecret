@@ -1,8 +1,10 @@
 <template>
     <div class="wrapper" @mousemove="trackMouse">
-        <div class="torch" :style="torchStyle" :class="{hideTorch: showSnowGlobe}"></div>
+        <button @click="resetSecretSanta" v-show="false"> RESET </button>
+
+        <div class="torch" :style="torchStyle" :class="{hideTorch: showMauraudersMap}"></div>
         <Transition name="snowball">
-            <marauders-map :clicked-name="participantNameClicked" :name="pairToDisplay" v-if="showSnowGlobe" @closeSnowball="handleCloseSnowball" />
+            <marauders-map :clicked-name="participantNameClicked" :name="pairToDisplay" v-if="showMauraudersMap" @closeMap="handleCloseMap" />
         </Transition>
         
         <div class="ss-container">
@@ -10,7 +12,6 @@
                 <Participant @discovered="handleDiscovered" :participant="participant" :pair="participant.pair !== null ? participants.find(p => p.id === participant.pair) : null"/>
             </div>
         </div>
-        <button @click="resetSecretSanta" v-show="false"> RESET </button>
     </div>
 </template>
 
@@ -26,18 +27,18 @@ export default {
     data () {
         return {
             participants : [
-                { id: 0, name: 'Rémy', illegal: [1], status: 'default', pair: null},
-                { id: 1, name: 'Aurélie', illegal: [0], status: 'default', pair: null},
-                { id: 2, name: 'Alexis', illegal: [4], status: 'default', pair: null},
-                { id: 3, name: 'Matteo', illegal: [5], status: 'default', pair: null},
-                { id: 4, name: 'Léa', illegal: [2, 5], status: 'default', pair: null},
-                { id: 5, name: 'Victoria', illegal: [3, 4], status: 'default', pair: null},
-                { id: 6, name: 'Axelle', illegal: [7], status: 'default', pair: null},
-                { id: 7, name: 'Marco', illegal: [6], status: 'default', pair: null},
+                { id: 0, name: 'Rémy', illegal: [1, 7], status: 'default', pair: null, house:'poufsouffle'},
+                { id: 1, name: 'Aurélie', illegal: [0, 5], status: 'default', pair: null, house:'poufsouffle'},
+                { id: 2, name: 'Alexis', illegal: [4, 6], status: 'default', pair: null, house:'serdaigle'},
+                { id: 3, name: 'Matteo', illegal: [5, 1], status: 'default', pair: null, house:'serpentard'},
+                { id: 4, name: 'Léa', illegal: [2, 5, 0], status: 'default', pair: null, house:'gryffondor'},
+                { id: 5, name: 'Victoria', illegal: [3, 4, 2], status: 'default', pair: null, house:'serpentard'},
+                { id: 6, name: 'Axelle', illegal: [7, 4], status: 'default', pair: null, house:'serdaigle'},
+                { id: 7, name: 'Marco', illegal: [6, 3], status: 'default', pair: null, house:'gryffondor'},
             ],
             participantNameClicked: null,
             pairToDisplay: null,
-            showSnowGlobe: false,
+            showMauraudersMap: false,
             mouseX: 0,
             mouseY: 0,
             isTracking: false
@@ -90,12 +91,12 @@ export default {
             
             this.pairToDisplay = this.participants.find(p => p.id === value.pair).name
             this.participantNameClicked = value.name
-            this.showSnowGlobe =  true;
+            this.showMauraudersMap =  true;
             this.saveToLocalStorage()
         },
-        handleCloseSnowball(value){
+        handleCloseMap(value){
             if(value) {
-                this.showSnowGlobe = false
+                this.showMauraudersMap = false
             }
 
         },

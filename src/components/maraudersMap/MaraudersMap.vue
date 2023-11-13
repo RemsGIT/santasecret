@@ -50,6 +50,8 @@
                 </div>
             </div>
         </div>
+        
+        <button v-if="showName" class="marauders_close_map" @click="() => this.$emit('closeMap', true)">FERMER</button>
     </div>
 </template>
 
@@ -71,18 +73,13 @@ export default {
         },
     },
     methods: {
-        clickOutsideSnowball(e){
-            if(!document.querySelector('.snow-ball').contains(e.target)) {
-                this.$emit('closeSnowball', true)
-            }
-        },
         clickStartAnimation() {
             this.startAnimation = true
         }
     },
     mounted() {
         // Snowglobe displayed
-        setTimeout(() => this.showName = true, 16000)
+        setTimeout(() => this.showName = true, 17000)
     }
 };
 </script>
