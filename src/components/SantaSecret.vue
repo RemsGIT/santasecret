@@ -8,8 +8,8 @@
         </Transition>
         
         <div class="ss-container">
-            <div class="ss-participant" v-for="participant in participants" v-bind:key="participant.id">
-                <Participant @discovered="handleDiscovered" :participant="participant" :pair="participant.pair !== null ? participants.find(p => p.id === participant.pair) : null"/>
+            <div class="ss-participant" v-for="participant in participants.mergedGroups" v-bind:key="participant.id">
+                <Participant @discovered="handleDiscovered" :participant="participant" :pair="participant.pair !== null ? participants.mergedGroups.find(p => p.id === participant.pair) : null"/>
             </div>
         </div>
     </div>
@@ -26,19 +26,31 @@ export default {
     },
     data () {
         return {
-            participants : [
-                { id: 0, name: 'Rémy', illegal: [1, 7], status: 'default', pair: null, house:'poufsouffle'},
-                { id: 1, name: 'Aurélie', illegal: [0, 5], status: 'default', pair: null, house:'poufsouffle'},
-                { id: 2, name: 'Alexis', illegal: [4, 6], status: 'default', pair: null, house:'serdaigle'},
-                { id: 3, name: 'Matteo', illegal: [5, 1], status: 'default', pair: null, house:'serpentard'},
-                { id: 4, name: 'Léa', illegal: [2, 5, 0], status: 'default', pair: null, house:'gryffondor'},
-                { id: 5, name: 'Victoria', illegal: [3, 4, 2], status: 'default', pair: null, house:'serpentard'},
-                { id: 6, name: 'Axelle', illegal: [7, 4], status: 'default', pair: null, house:'serdaigle'},
-                { id: 7, name: 'Marco', illegal: [6, 3], status: 'default', pair: null, house:'gryffondor'},
-            ],
+            participants : {
+                groups: [
+                    [
+                        { id: 0, name: 'Rémy', illegal: [1, 7], status: 'default', pair: null, house:'poufsouffle'},
+                        { id: 1, name: 'Aurélie', illegal: [0, 5], status: 'default', pair: null, house:'poufsouffle'},
+                        { id: 2, name: 'Alexis', illegal: [4, 6], status: 'default', pair: null, house:'serdaigle'},
+                        { id: 3, name: 'Matteo', illegal: [5, 1], status: 'default', pair: null, house:'serpentard'},
+                        { id: 4, name: 'Léa', illegal: [2, 5, 0], status: 'default', pair: null, house:'gryffondor'},
+                        { id: 5, name: 'Victoria', illegal: [3, 4, 2], status: 'default', pair: null, house:'serpentard'},
+                        { id: 6, name: 'Axelle', illegal: [7, 4], status: 'default', pair: null, house:'serdaigle'},
+                        { id: 7, name: 'Marco', illegal: [6, 3], status: 'default', pair: null, house:'gryffondor'},
+                    ],
+                    [
+                        { id: 8, name: 'Molly', illegal: [], status: 'default', pair: null, house:'gryffondor'},
+                        { id: 9, name: 'Talia', illegal: [], status: 'default', pair: null, house:'serdaigle'},
+                        { id: 10, name: 'Loki', illegal: [], status: 'default', pair: null, house:'serpentard'},
+                        { id: 11, name: 'Charlie', illegal: [], status: 'default', pair: null, house:'poufsouffle'},
+                    ]
+                ],
+                mergedGroups: null
+            },
             participantNameClicked: null,
             pairToDisplay: null,
             showMauraudersMap: false,
+            doneGroupSearch: 0,
             mouseX: 0,
             mouseY: 0,
             isTracking: false
@@ -47,24 +59,27 @@ export default {
     methods: {
         findPairAuto(){ // Search the solution recursively
             if(!localStorage.getItem('participants')) {
-                this.participants.forEach((participant,index) => {
-                    if(!this.findPair(participant)){
-                        this.resetSecretSanta()
-                    }
-                    else if(index === 7) { // Good and last one
-                        console.log('finished')
-                        this.saveToLocalStorage();
-                    }
-                })
+                for (let i = this.doneGroupSearch; i < this.participants.groups.length; i++) {
+                    let group = this.participants.groups[i]
+                    group.forEach((participant, index) => {
+                        if(!this.findPair(participant, i)){
+                            this.resetSecretSanta(i)
+                        }
+                        else if((index+group[0].id) === (group[0].id + group.length-1)) { // Good and last one
+                            this.doneGroupSearch++;
+                            this.saveToLocalStorage();
+                        }
+                    })
+                }
             }
         },
-        findPair(participant) {
+        findPair(participant, group) {
             // Get all available participants and remove their illegal
-            let available = this.participants
+            let available = this.participants.groups[group]
             available = available.filter(p => p.id !== participant.id && !participant.illegal.includes(p.id));
 
             // Find the pairs and remove them --> two persons can't give a gift to the same person
-            this.participants.forEach(element => {
+            this.participants.groups[group].forEach(element => {
                 if(element.pair !== null) {
                     let index = available.findIndex(a => a.id === element.pair);
                     if(index >= 0) {
@@ -87,11 +102,12 @@ export default {
             }
         },
         handleDiscovered(value){
-            this.participants.find(p => p.id === value.id).status = 'disabled'
-            
-            this.pairToDisplay = this.participants.find(p => p.id === value.pair).name
+             this.participants.mergedGroups.find(p => p.id === value.id).status = 'disabled'
+
+            this.pairToDisplay = this.participants.mergedGroups.find(p => p.id === value.pair).name
             this.participantNameClicked = value.name
             this.showMauraudersMap =  true;
+
             this.saveToLocalStorage()
         },
         handleCloseMap(value){
@@ -101,11 +117,16 @@ export default {
 
         },
         saveToLocalStorage(){
+            localStorage.clear();
+
+            if(!this.participants.mergedGroups) {
+                this.participants.mergedGroups = [].concat(...this.participants.groups)
+            }
             // Save to localStorage
             localStorage.setItem('participants', JSON.stringify(this.participants))
         },
-        resetSecretSanta(){
-            this.participants.forEach(element => {
+        resetSecretSanta(group){
+            this.participants.groups[group].forEach(element => {
                 element.status = 'default'
                 element.pair = null
             })
