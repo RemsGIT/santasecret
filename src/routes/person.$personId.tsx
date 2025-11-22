@@ -1,45 +1,22 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { ArrowLeft, UserX } from 'lucide-react'
+import { ArrowLeft, Gift, UserX } from 'lucide-react'
+import { z } from 'zod'
+import { people } from '../data/people'
+import { getReceiverForGiver } from '../services/giftAttribution'
+import type { GiftAttribution } from '../types/person'
+
+const PersonSearchSchema = z.object({
+  attributions: z.string().optional(),
+})
 
 export const Route = createFileRoute('/person/$personId')({
   component: PersonContext,
+  validateSearch: PersonSearchSchema,
 })
-
-const people = [
-  { 
-    id: 1, 
-    name: 'Alice Martin', 
-    forbidden: [2, 3]
-  },
-  { 
-    id: 2, 
-    name: 'Bob Dupont', 
-    forbidden: [1]
-  },
-  { 
-    id: 3, 
-    name: 'Claire Rousseau', 
-    forbidden: [4, 1]
-  },
-  { 
-    id: 4, 
-    name: 'David Bernard', 
-    forbidden: [3, 5]
-  },
-  { 
-    id: 5, 
-    name: 'Emma Lefevre', 
-    forbidden: [6]
-  },
-  { 
-    id: 6, 
-    name: 'François Moreau', 
-    forbidden: [5]
-  },
-]
 
 function PersonContext() {
   const { personId } = Route.useParams()
+  const search = Route.useSearch()
   const person = people.find(p => p.id === parseInt(personId))
 
   if (!person) {
@@ -58,7 +35,13 @@ function PersonContext() {
     )
   }
 
+  const attributions: Array<GiftAttribution> | null = search.attributions 
+    ? JSON.parse(search.attributions) 
+    : null
+
   const forbiddenPeople = people.filter(p => person.forbidden.includes(p.id))
+  const receiverId = attributions ? getReceiverForGiver(attributions, person.id) : null
+  const receiver = receiverId ? people.find(p => p.id === receiverId) : null
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
@@ -84,7 +67,27 @@ function PersonContext() {
               </h1>
             </div>
 
-            <div className="max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {receiver && (
+                <div className="bg-slate-700/50 rounded-lg p-6">
+                  <h3 className="flex items-center gap-2 text-white text-xl font-semibold mb-4">
+                    <Gift className="w-5 h-5 text-yellow-400" />
+                    Cadeau à offrir
+                  </h3>
+                  <div className="flex items-center gap-4 p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+                    <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-bold">
+                        {receiver.name.charAt(0)}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-white font-semibold">{receiver.name}</p>
+                      <p className="text-green-400 text-sm">Destinataire de votre cadeau</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-slate-700/50 rounded-lg p-6">
                 <h3 className="flex items-center gap-2 text-white text-xl font-semibold mb-4">
                   <UserX className="w-5 h-5 text-red-400" />

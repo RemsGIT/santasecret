@@ -1,0 +1,64 @@
+import { Canvas } from '@react-three/fiber'
+import { Environment, OrbitControls } from '@react-three/drei'
+import { Vector3 } from 'three'
+import { useRef } from 'react'
+import Player from './Player'
+import SceneMap from './SceneMap'
+import ParticipantLabels from './ParticipantLabels'
+
+export default function SelectionScene() {
+  return (
+    <Canvas
+      camera={{
+        position: [0, 3, 6],
+        fov: 75,
+        near: 0.1,
+        far: 1000
+      }}
+      shadows
+      className="h-full w-full"
+    >
+      {/* Éclairage global très faible pour créer l'ambiance de nuit profonde */}
+      <ambientLight intensity={0.02} color="#0a0a1a" />
+      <hemisphereLight
+        groundColor="#050510"
+        intensity={0.03}
+      />
+
+      {/* Environnement sombre */}
+      <Environment preset="night" />
+
+      {/* Contrôles de caméra désactivés pour le jeu */}
+      <OrbitControls
+        enablePan={false}
+        enableZoom={false}
+        enableRotate={false}
+        target={new Vector3(0, 0, 0)}
+      />
+
+      {/* Map de Noël */}
+      <SceneMap />
+
+      {/* Effets optionnels (commentés temporairement pour performance) */}
+      {/* <SnowSystem /> */}
+      {/* <SceneLights /> */}
+
+      {/* Scène de jeu */}
+      <GameScene />
+    </Canvas>
+  )
+}
+
+function GameScene() {
+  const playerRef = useRef(null)
+
+  return (
+    <>
+      {/* Joueur avec lampe torche */}
+      <Player ref={playerRef} />
+
+      {/* Labels des participants dans la scène */}
+      <ParticipantLabels playerRef={playerRef} />
+    </>
+  )
+}
