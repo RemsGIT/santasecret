@@ -102,7 +102,7 @@ const Player = forwardRef<Mesh>((_props, ref) => {
 
     const targetPosition = camera.position
       .clone()
-      .add(direction.multiplyScalar(10))
+      .add(direction.multiplyScalar(20))
     spotLightRef.current.target.position.copy(targetPosition)
     spotLightRef.current.target.updateMatrixWorld()
   })
@@ -118,10 +118,10 @@ const Player = forwardRef<Mesh>((_props, ref) => {
       {/* Lampe torche - SpotLight avec plus de portée */}
       <spotLight
         ref={spotLightRef}
-        intensity={3}
-        angle={Math.PI / 5} // Cône légèrement plus large
+        intensity={10}
+        angle={Math.PI / 4} // Cône légèrement plus large
         penumbra={0.4} // Transition douce des bords
-        distance={30} // Portée plus importante
+        distance={20} // Portée plus importante
         decay={1.5} // Atténuation moins agressive
         color="#fff8dc" // Couleur blanc chaud
         castShadow
