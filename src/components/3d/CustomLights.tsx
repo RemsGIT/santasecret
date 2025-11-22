@@ -1,8 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import type { PointLight } from 'three'
 
-interface LightPoint {
+export interface LightPoint {
   position: [number, number, number]
   color: string
   intensity: number
@@ -11,7 +10,7 @@ interface LightPoint {
 }
 
 interface CustomLightsProps {
-  lights: LightPoint[]
+  lights: Array<LightPoint>
 }
 
 export default function CustomLights({ lights }: CustomLightsProps) {
@@ -36,6 +35,7 @@ export default function CustomLights({ lights }: CustomLightsProps) {
       {lights.map((lightConfig, index) => (
         <group key={index}>
           {/* Sphère émissive */}
+          {/*
           <mesh
             position={lightConfig.position}
             ref={(ref) => {
@@ -51,6 +51,8 @@ export default function CustomLights({ lights }: CustomLightsProps) {
               emissiveIntensity={5}
             />
           </mesh>
+          */}
+
 
           {/* Lumière pour éclairer autour */}
           <pointLight
