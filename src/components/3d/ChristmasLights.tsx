@@ -64,11 +64,11 @@ export function TreeLights({ treePosition }: { treePosition: [number, number, nu
     const positions: Array<[number, number, number]> = []
     const [x, y, z] = treePosition
 
-    // Guirlandes en spirale autour de l'arbre (réduites)
-    for (let i = 0; i < 4; i++) {
-      const height = 1 + (i / 8) * 3
-      const angle = (i / 8) * Math.PI * 4
-      const radius = 1.2 - (i / 8) * 0.8
+    // Guirlandes en spirale autour de l'arbre (très réduites pour performance)
+    for (let i = 0; i < 2; i++) {
+      const height = 1 + (i / 4) * 3
+      const angle = (i / 4) * Math.PI * 4
+      const radius = 1.2 - (i / 4) * 0.8
 
       positions.push([
         x + Math.cos(angle) * radius,
@@ -88,14 +88,11 @@ export function HouseLights({ housePosition }: { housePosition: [number, number,
   const lightPositions = useMemo(() => {
     const [x, y, z] = housePosition
 
-    // Guirlandes autour de la maison
+    // Guirlandes autour de la maison (réduites)
     const corners = [
       [x - 1.5, y + 2, z - 1],
       [x + 1.5, y + 2, z - 1],
-      [x + 1.5, y + 2, z + 1],
-      [x - 1.5, y + 2, z + 1],
-      [x, y + 3, z - 1], // Sommet du toit
-      [x, y + 3, z + 1],
+      [x, y + 3, z], // Sommet du toit seulement
     ]
 
     return corners as Array<[number, number, number]>

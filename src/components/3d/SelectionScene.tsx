@@ -5,6 +5,8 @@ import { useRef } from 'react'
 import Player from './Player'
 import SceneMap from './SceneMap'
 import ParticipantLabels from './ParticipantLabels'
+import SnowSystem from './SnowSystem'
+import SceneLights from '@/components/3d/SceneLights.tsx'
 
 export default function SelectionScene() {
   return (
@@ -40,9 +42,10 @@ export default function SelectionScene() {
       {/* Map de Noël */}
       <SceneMap />
 
-      {/* Effets optionnels (commentés temporairement pour performance) */}
-      {/* <SnowSystem /> */}
-      {/* <SceneLights /> */}
+      {/* Effets de neige */}
+      <SnowSystem />
+
+      <SceneLights />
 
       {/* Scène de jeu */}
       <GameScene />
