@@ -6,6 +6,7 @@ import Player from './Player'
 import SceneMap from './SceneMap'
 import ParticipantLabels from './ParticipantLabels'
 import SnowSystem from './SnowSystem'
+import HouseSigns from './HouseSigns'
 import SceneLights from '@/components/3d/SceneLights.tsx'
 
 export default function SelectionScene() {
@@ -63,6 +64,9 @@ function GameScene() {
 
       {/* Labels des participants dans la scène */}
       <ParticipantLabels playerRef={playerRef} />
+      
+      {/* Pancartes des maisons */}
+      <HouseSigns />
     </>
   )
 }
