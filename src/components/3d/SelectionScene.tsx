@@ -11,22 +11,23 @@ export default function SelectionScene() {
     <Canvas
       camera={{
         position: [0, 3, 6],
-        fov: 75,
-        near: 0.1,
+        fov: 100,
+        near: 0.5,
         far: 1000
       }}
       shadows
       className="h-full w-full"
     >
       {/* Éclairage global très faible pour créer l'ambiance de nuit profonde */}
-      <ambientLight intensity={0.02} color="#0a0a1a" />
+
+      <ambientLight intensity={1} color="#0a0a1a" />
       <hemisphereLight
         groundColor="#050510"
-        intensity={0.03}
+        intensity={0.002}
       />
 
       {/* Environnement sombre */}
-      <Environment preset="night" />
+      <Environment preset="night" environmentIntensity={0.1} />
 
       {/* Contrôles de caméra désactivés pour le jeu */}
       <OrbitControls

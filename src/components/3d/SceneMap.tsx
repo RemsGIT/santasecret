@@ -19,7 +19,7 @@ function GLBModel() {
         child.castShadow = true
         child.receiveShadow = true
 
-        // Réduire fortement l'émission des matériaux pour une nuit plus sombre
+        // Garder les couleurs d'origine, juste réduire un peu l'émission pour l'ambiance nocturne
         if (child.material) {
           if (Array.isArray(child.material)) {
             child.material.forEach((mat: any) => {

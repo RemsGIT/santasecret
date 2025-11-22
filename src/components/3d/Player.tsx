@@ -110,7 +110,7 @@ const Player = forwardRef<Mesh>((_props, ref) => {
   return (
     <group>
       {/* Le joueur (invisible en première personne) */}
-      <mesh ref={playerRef} position={[0, 1, 0]} castShadow visible={false}>
+      <mesh ref={playerRef} position={[0, 0, 0]} castShadow visible={false}>
         <capsuleGeometry args={[0.5, 1]} />
         <meshStandardMaterial color="#4a90e2" />
       </mesh>
@@ -118,11 +118,11 @@ const Player = forwardRef<Mesh>((_props, ref) => {
       {/* Lampe torche - SpotLight avec plus de portée */}
       <spotLight
         ref={spotLightRef}
-        intensity={10}
-        angle={Math.PI / 4} // Cône légèrement plus large
+        intensity={30}
+        angle={Math.PI / 8} // Cône légèrement plus large
         penumbra={0.4} // Transition douce des bords
-        distance={20} // Portée plus importante
-        decay={1.5} // Atténuation moins agressive
+        distance={40} // Portée plus importante
+        decay={1.8} // Atténuation moins agressive
         color="#fff8dc" // Couleur blanc chaud
         castShadow
         shadow-mapSize={[1024, 1024]}
