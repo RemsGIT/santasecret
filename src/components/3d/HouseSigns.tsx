@@ -1,4 +1,4 @@
-import { useGLTF, Text } from '@react-three/drei'
+import { Text, useGLTF } from '@react-three/drei'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { people } from '../../data/people'
@@ -54,7 +54,7 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
 
       {/* Nom de la personne sur la pancarte */}
       <Text
-        position={[-0.04, 0.02, 0.1]}
+        position={[-0.04, 0.02, 0.07]}
         fontSize={0.1}
         color="black"
         anchorX="center"
@@ -93,13 +93,13 @@ export default function HouseSigns() {
     rotation?: [number, number, number]
     personIndex: number
   }> = [
-    { position: [5, 3, 8], personIndex: 0 },    // Rémy
-    { position: [-5, 3, 8], personIndex: 1 },   // Aurélie
-    { position: [8, 3, -2], personIndex: 2 },   // Alexis
-    { position: [-8, 3, -2], personIndex: 3 },  // Matteo
-    { position: [10, 3, 5], personIndex: 4 },   // Lea
-    { position: [-10, 3, 5], personIndex: 5 },  // Victoria
-    { position: [3, 3, -8], personIndex: 6 },   // Axelle
+    { position: [24.8, 1.5, -4.5], personIndex: 0, rotation: [0,89.5,0] },    // Rémy
+    { position: [17.2, 1.5, 0.6], personIndex: 1, rotation: [0,-45.6,0] },   // Aurélie
+    { position: [-7.9, 1.5, 12.8], personIndex: 2, rotation: [0,90.5,0] },   // Alexis
+    { position: [-14.9, 1.5, -4.7], personIndex: 3, rotation: [0,45.2,0] },  // Matteo
+    { position: [5, 1.5, 14.35], personIndex: 4, rotation: [0,-90.7,0] },   // Lea
+    { position: [-14.2, 1.5, 5.2], personIndex: 5,rotation: [0,90,0] },  // Victoria
+    { position: [4.1, 1.5, -14.7], personIndex: 6, rotation: [0,-0.2,0] },   // Axelle
     { position: [-7.9, 1.5, -12.87], personIndex: 7, rotation: [0,0.64,0] },  // Marco
   ]
 
