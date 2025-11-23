@@ -89,20 +89,3 @@ export default function TargetedLighting({ modelPath, targetObjects: targets }: 
 
   return null // Ce composant ne rend rien, il modifie juste la scène existante
 }
-
-// Composant helper pour lister tous les noms d'objets dans la console
-export function SceneDebugger({ modelPath }: { modelPath: string }) {
-  const { scene } = useGLTF(modelPath)
-
-  useEffect(() => {
-    console.log('=== Objets dans la scène ===')
-    scene.traverse((child) => {
-      if ((child as any).isMesh && child.name) {
-        console.log(`Mesh: ${child.name}`)
-      }
-    })
-    console.log('=== Fin de la liste ===')
-  }, [scene])
-
-  return null
-}

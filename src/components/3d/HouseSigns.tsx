@@ -3,8 +3,61 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useFrame, useThree } from '@react-three/fiber'
 import { people } from '../../data/people'
+import ParticipantPicture from './ParticipantPicture'
 import type { Mesh } from 'three'
 import { Vector3 } from 'three'
+
+// Composant pour les particules scintillantes
+function StarParticles() {
+  const particlesRef = useRef<Array<Mesh>>(Array(6).fill(null))
+
+  useFrame((state) => {
+    const time = state.clock.elapsedTime
+
+    particlesRef.current.forEach((particle, index) => {
+      if (particle) {
+        // Animation de rotation et de scintillement
+        const phase = time * 2 + index * Math.PI / 3
+        const radius = 0.8 + Math.sin(phase) * 0.2
+        const angle = (index * Math.PI * 2) / 6 + time * 0.5
+
+        particle.position.set(
+          Math.cos(angle) * radius,
+          0.1 + Math.sin(phase * 1.5) * 0.05,
+          Math.sin(angle) * radius
+        )
+
+        // Scintillement de l'opacité
+        const material = particle.material as any
+        material.opacity = 0.3 + Math.sin(phase * 3) * 0.3
+
+        // Rotation
+        particle.rotation.z = time + index
+      }
+    })
+  })
+
+  return (
+    <group position={[-0.08, 0, 0]}>
+      {Array.from({ length: 6 }, (_, i) => (
+        <mesh
+          key={i}
+          ref={(el) => {
+            if (el) particlesRef.current[i] = el
+          }}
+        >
+          <planeGeometry args={[0.08, 0.08]} />
+          <meshBasicMaterial
+            color="#ffff00"
+            transparent
+            opacity={0.6}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
 
 interface HouseSignProps {
   position: [number, number, number]
@@ -17,6 +70,7 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
   const { scene } = useGLTF('/models/wooden-sign-enter.glb')
   const signRef = useRef<Mesh>(null)
   const [isNear, setIsNear] = useState(false)
+  const [opacity, setOpacity] = useState(0)
   const navigate = useNavigate()
   const { camera } = useThree()
 
@@ -30,7 +84,7 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
     })
   }, [scene])
 
-  // Détection de proximité avec le joueur
+  // Détection de proximité avec le joueur et animation
   useFrame(() => {
     // Position de la pancarte
     const signPosition = new Vector3(...position)
@@ -42,9 +96,25 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
 
     // Définir la distance d'interaction (2 unités)
     const interactionDistance = 2
+    const wasNear = isNear
+    const newIsNear = distance <= interactionDistance
 
     // Mettre à jour l'état de proximité
-    setIsNear(distance <= interactionDistance)
+    setIsNear(newIsNear)
+
+    // Animation fluide d'apparition/disparition
+    if (newIsNear && !wasNear) {
+      // Apparition
+      setOpacity(0)
+    }
+
+    // Animer l'opacité vers la cible
+    const targetOpacity = newIsNear ? 1 : 0
+    setOpacity(prev => {
+      const speed = 0.05
+      const diff = targetOpacity - prev
+      return Math.abs(diff) < 0.01 ? targetOpacity : prev + diff * speed
+    })
   })
 
   useEffect(() => {
@@ -88,19 +158,42 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
         {personName}
       </Text>
 
-      {/* Instruction "Press E" quand proche */}
-      {isNear && (
-        <Text
-          position={[-0.08, 0.1, 0.12]}
-          fontSize={0.2}
-          color="#ffff00"
-          anchorX="center"
-          anchorY="middle"
-          maxWidth={2}
-          textAlign="center"
-        >
-          Press E to visit
-        </Text>
+      {/* Instruction "Press E" avec effet WOW */}
+      {opacity > 0 && (
+        <group scale={[0.8 + opacity * 0.2, 0.8 + opacity * 0.2, 1]}>
+          {/* Effet de glow/halo derrière le texte */}
+          <mesh position={[-0.08, 0.1, 0.11]}>
+            <planeGeometry args={[1.5, 0.4]} />
+            <meshBasicMaterial
+              color="#ffff00"
+              opacity={0.1 * opacity}
+              transparent
+              depthWrite={false}
+            />
+          </mesh>
+
+          {/* Texte principal avec animation */}
+          <Text
+            position={[-0.08, 0.1, 0.12]}
+            fontSize={0.18}
+            color={`rgba(255, 255, 255, ${opacity})`}
+            anchorX="center"
+            anchorY="middle"
+            maxWidth={2}
+            textAlign="center"
+            outlineWidth={0.02}
+            outlineColor={`rgba(255, 255, 0, ${opacity})`}
+            strokeWidth={0.01}
+            strokeColor={`rgba(0, 0, 0, ${opacity * 0.8})`}
+          >
+            🔑 Press E to visit
+          </Text>
+
+          {/* Particules scintillantes autour du texte */}
+          <group scale={[opacity, opacity, opacity]}>
+            <StarParticles />
+          </group>
+        </group>
       )}
     </group>
   )
@@ -126,15 +219,34 @@ export default function HouseSigns() {
 
   return (
     <>
-      {housePositions.map((house, index) => (
-        <HouseSign
-          key={index}
-          position={house.position}
-          rotation={house.rotation}
-          personName={people[house.personIndex].name}
-          personId={people[house.personIndex].id}
-        />
-      ))}
+      {housePositions.map((house, index) => {
+        const person = people[house.personIndex]
+        const picturePosition: [number, number, number] = [
+          house.position[0],
+          house.position[1] + 0.65, // 0.8 unités plus haut
+          house.position[2]
+        ]
+
+        return (
+          <group key={index}>
+            {/* Photo encadrée au-dessus de la pancarte */}
+            <ParticipantPicture
+              position={picturePosition}
+              rotation={house.rotation}
+              size={[0.5, 0.85]} // Facilement ajustable [largeur, hauteur]
+              imagePath={person.image}
+            />
+
+            {/* Pancarte avec nom */}
+            <HouseSign
+              position={house.position}
+              rotation={house.rotation}
+              personName={person.name}
+              personId={person.id}
+            />
+          </group>
+        )
+      })}
     </>
   )
 }

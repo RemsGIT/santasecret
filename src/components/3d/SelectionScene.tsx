@@ -1,12 +1,14 @@
 import { Canvas } from '@react-three/fiber'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { Vector3 } from 'three'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import Player from './Player'
 import SceneMap from './SceneMap'
 import SnowSystem from './SnowSystem'
 import HouseSigns from './HouseSigns'
-import TargetedLighting, { SceneDebugger } from './TargetedLighting'
+import TargetedLighting from './TargetedLighting'
+import CollisionSystem from './CollisionSystem'
+import type { Mesh } from 'three'
 
 export default function SelectionScene() {
   return (
@@ -42,9 +44,6 @@ export default function SelectionScene() {
       {/* Map de Noël */}
       <SceneMap />
 
-      {/* Debug: Afficher tous les noms d'objets dans la console */}
-      <SceneDebugger modelPath="/models/scene.glb" />
-
       {/* Illuminer les boules de Noël avec leurs couleurs */}
       <TargetedLighting
         modelPath="/models/scene.glb"
@@ -57,6 +56,7 @@ export default function SelectionScene() {
           { name: 'Chrimah_Lights_3_Bulb_Yeller1_0', color: 0xFBFF00, flicker: true }, // Guirlande jaune cabane
           { name: 'Chrimah_Lights_3_Bulb_Green1_0', color: 0x00ff00, flicker: true }, // Guirlande vert cabane
           { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true }, // Guirlande rouge cabane
+          { name: 'Lamp4_Window_Light_0', color: 0xE78D43, flicker: false }, // Lampadaire - fenetres orange chaud
           { name: 'Chrimas_Star_Star_Mat_0', color: 0xFBFF00, flicker: false }, // Étoile
         ]}
       />
@@ -72,11 +72,18 @@ export default function SelectionScene() {
 
 function GameScene() {
   const playerRef = useRef(null)
+  const [houses, setHouses] = useState<Mesh[]>([])
 
   return (
     <>
-      {/* Joueur avec lampe torche */}
-      <Player ref={playerRef} />
+      {/* Système de collision */}
+      <CollisionSystem
+        modelPath="/models/scene.glb"
+        onCollisionDataReady={setHouses}
+      />
+
+      {/* Joueur avec lampe torche et collision */}
+      <Player ref={playerRef} houses={houses} />
 
       {/* Pancartes des maisons */}
       <HouseSigns />

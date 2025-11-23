@@ -2,9 +2,14 @@ import { forwardRef, useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Euler, Vector3 } from 'three'
 import useKeyboardControls from '../../hooks/useKeyboardControls'
+import { checkHousesCollision } from './CollisionSystem'
 import type { Mesh, SpotLight} from 'three';
 
-const Player = forwardRef<Mesh>((_props, ref) => {
+interface PlayerProps {
+  houses?: Mesh[]
+}
+
+const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
   const playerRef = ref as React.RefObject<Mesh>
   const spotLightRef = useRef<SpotLight>(null)
   const { getMovementVector } = useKeyboardControls()
@@ -60,7 +65,7 @@ const Player = forwardRef<Mesh>((_props, ref) => {
 
     const { x, z } = getMovementVector()
 
-    // Déplacement relatif à la direction de la caméra
+    // Déplacement relatif à la direction de la caméra avec vérification de collision
     if (x !== 0 || z !== 0) {
       // Calculer les directions avant/droite basées sur la rotation Y de la caméra
       const forward = new Vector3(0, 0, -1)
@@ -75,7 +80,17 @@ const Player = forwardRef<Mesh>((_props, ref) => {
       movement.add(forward.multiplyScalar(-z * speed)) // Inverser z pour un contrôle plus naturel
       movement.add(right.multiplyScalar(x * speed))
 
-      playerRef.current.position.add(movement)
+      // Calculer la nouvelle position potentielle
+      const currentPos = playerRef.current.position.clone()
+      const newPos = currentPos.clone().add(movement)
+
+      // Vérifier la collision avec toutes les maisons
+      const hasCollision = checkHousesCollision(newPos, houses)
+
+      // Ne bouger que s'il n'y a pas de collision
+      if (!hasCollision) {
+        playerRef.current.position.copy(newPos)
+      }
     }
 
     // Caméra en première personne - suit simplement le joueur
