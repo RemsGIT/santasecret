@@ -163,7 +163,7 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
         <group scale={[0.8 + opacity * 0.2, 0.8 + opacity * 0.2, 1]}>
           {/* Effet de glow/halo derrière le texte */}
           <mesh position={[-0.08, 0.1, 0.11]}>
-            <planeGeometry args={[1.5, 0.4]} />
+            <planeGeometry args={[1.5, 0.2]} />
             <meshBasicMaterial
               color="#ffff00"
               opacity={0.1 * opacity}
@@ -175,18 +175,18 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
           {/* Texte principal avec animation */}
           <Text
             position={[-0.08, 0.1, 0.12]}
-            fontSize={0.18}
+            fontSize={0.08}
             color={`rgba(255, 255, 255, ${opacity})`}
             anchorX="center"
             anchorY="middle"
             maxWidth={2}
             textAlign="center"
-            outlineWidth={0.02}
+            outlineWidth={0.005}
             outlineColor={`rgba(255, 255, 0, ${opacity})`}
             strokeWidth={0.01}
             strokeColor={`rgba(0, 0, 0, ${opacity * 0.8})`}
           >
-            🔑 Press E to visit
+            Appuie sur E pour rentrer chez {personName}
           </Text>
 
           {/* Particules scintillantes autour du texte */}
