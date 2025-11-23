@@ -4,10 +4,9 @@ import { Vector3 } from 'three'
 import { useRef } from 'react'
 import Player from './Player'
 import SceneMap from './SceneMap'
-import ParticipantLabels from './ParticipantLabels'
 import SnowSystem from './SnowSystem'
 import HouseSigns from './HouseSigns'
-import SceneLights from '@/components/3d/SceneLights.tsx'
+import TargetedLighting, { SceneDebugger } from './TargetedLighting'
 
 export default function SelectionScene() {
   return (
@@ -43,10 +42,27 @@ export default function SelectionScene() {
       {/* Map de Noël */}
       <SceneMap />
 
+      {/* Debug: Afficher tous les noms d'objets dans la console */}
+      <SceneDebugger modelPath="/models/scene.glb" />
+
+      {/* Illuminer les boules de Noël avec leurs couleurs */}
+      <TargetedLighting
+        modelPath="/models/scene.glb"
+        targetObjects={[
+          { name: 'polySurface231_Deco3_0', color: 0x00ff00, flicker: true }, // Vert
+          { name: 'polySurface229_Deco2_0', color: 0x0066ff, flicker: true }, // Bleu
+          { name: 'polySurface199_Deco1_0', color: 0xff0000, flicker: true }, // Rouge
+          { name: 'polySurface228_Deco4_0', color: 0xFF00C7, flicker: true }, // Violet
+          { name: 'Chrimah_Lights_3_Bulb_Blue_0', color: 0x0066ff, flicker: true }, // Guirlande bleue cabane
+          { name: 'Chrimah_Lights_3_Bulb_Yeller1_0', color: 0xFBFF00, flicker: true }, // Guirlande jaune cabane
+          { name: 'Chrimah_Lights_3_Bulb_Green1_0', color: 0x00ff00, flicker: true }, // Guirlande vert cabane
+          { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true }, // Guirlande rouge cabane
+          { name: 'Chrimas_Star_Star_Mat_0', color: 0xFBFF00, flicker: false }, // Étoile
+        ]}
+      />
+
       {/* Effets de neige */}
       <SnowSystem />
-
-      <SceneLights />
 
       {/* Scène de jeu */}
       <GameScene />
@@ -62,9 +78,6 @@ function GameScene() {
       {/* Joueur avec lampe torche */}
       <Player ref={playerRef} />
 
-      {/* Labels des participants dans la scène */}
-      <ParticipantLabels playerRef={playerRef} />
-      
       {/* Pancartes des maisons */}
       <HouseSigns />
     </>

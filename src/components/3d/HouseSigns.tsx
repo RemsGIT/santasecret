@@ -1,8 +1,10 @@
 import { Text, useGLTF } from '@react-three/drei'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import { useFrame, useThree } from '@react-three/fiber'
 import { people } from '../../data/people'
 import type { Mesh } from 'three'
+import { Vector3 } from 'three'
 
 interface HouseSignProps {
   position: [number, number, number]
@@ -16,6 +18,7 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
   const signRef = useRef<Mesh>(null)
   const [isNear, setIsNear] = useState(false)
   const navigate = useNavigate()
+  const { camera } = useThree()
 
   useEffect(() => {
     // Configurer le modèle
@@ -27,11 +30,32 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
     })
   }, [scene])
 
+  // Détection de proximité avec le joueur
+  useFrame(() => {
+    // Position de la pancarte
+    const signPosition = new Vector3(...position)
+    // Position du joueur (caméra)
+    const playerPosition = camera.position.clone()
+
+    // Calculer la distance entre le joueur et la pancarte
+    const distance = playerPosition.distanceTo(signPosition)
+
+    // Définir la distance d'interaction (2 unités)
+    const interactionDistance = 2
+
+    // Mettre à jour l'état de proximité
+    setIsNear(distance <= interactionDistance)
+  })
+
   useEffect(() => {
     if (typeof window === 'undefined') return
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() === 'e' && isNear) {
+        // Libérer le pointeur avant la navigation
+        if (document.pointerLockElement) {
+          document.exitPointerLock()
+        }
         navigate({ to: `/person/${personId}` })
       }
     }
@@ -39,9 +63,6 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isNear, navigate, personId])
-
-  // TODO: Ajouter logique de détection de proximité avec le joueur
-  // Pour l'instant, on peut simuler l'interaction
 
   return (
     <group position={position} rotation={rotation}>
