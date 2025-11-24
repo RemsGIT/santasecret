@@ -5,6 +5,10 @@ interface KeyState {
   ArrowDown: boolean
   ArrowLeft: boolean
   ArrowRight: boolean
+  KeyW: boolean
+  KeyS: boolean
+  KeyA: boolean
+  KeyD: boolean
 }
 
 export default function useKeyboardControls() {
@@ -13,10 +17,13 @@ export default function useKeyboardControls() {
     ArrowDown: false,
     ArrowLeft: false,
     ArrowRight: false,
+    KeyW: false,
+    KeyS: false,
+    KeyA: false,
+    KeyD: false,
   })
 
   useEffect(() => {
-    // Protection SSR
     if (typeof window === 'undefined') return
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -56,10 +63,17 @@ export default function useKeyboardControls() {
     let x = 0
     let z = 0
 
+    // Flèches directionnelles
     if (keys.ArrowLeft) x -= 1
     if (keys.ArrowRight) x += 1
     if (keys.ArrowUp) z -= 1
     if (keys.ArrowDown) z += 1
+
+    // Touches ZQSD
+    if (keys.KeyA) x -= 1  // A = Q sur AZERTY
+    if (keys.KeyD) x += 1  // D = droite
+    if (keys.KeyW) z -= 1  // W = Z sur AZERTY
+    if (keys.KeyS) z += 1  // S = arrière
 
     // Normaliser pour déplacement diagonal
     if (x !== 0 && z !== 0) {

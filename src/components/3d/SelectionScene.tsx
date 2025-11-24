@@ -9,6 +9,7 @@ import HouseSigns from './HouseSigns'
 import TargetedLighting from './TargetedLighting'
 import CollisionSystem from './CollisionSystem'
 import Animals from './Animals'
+import NightSky from './NightSky'
 import type { Mesh } from 'three'
 
 export default function SelectionScene() {
@@ -32,7 +33,7 @@ export default function SelectionScene() {
       />
 
       {/* Environnement sombre */}
-      <Environment preset="night" environmentIntensity={0.1} />
+      <Environment preset="night" environmentIntensity={0.2} />
 
       {/* Contrôles de caméra désactivés pour le jeu */}
       <OrbitControls
@@ -55,10 +56,12 @@ export default function SelectionScene() {
           { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true }, // Guirlande rouge cabane
           { name: 'House_1_Window_Light_0', color: 0xE78D43, flicker: false }, // Lampadaire - fenetres orange chaud
           { name: 'polySurface4605_LP_set1_0', color: 0xFBFF00, flicker: false, power: 6 }, // Guirlandes sapin
-          { name: 'base_big_LP_set2_0', color: 0x00ff00, flicker: false, power: 20 }, // Sapin + base
           { name: 'base_big_LP_set2_0', color: 0x036A36, flicker: false, power: 0.04 }, // Sapin + base
         ]}
       />
+
+      {/* Ciel étoilé avec lune */}
+      <NightSky />
 
       {/* Effets de neige */}
       <SnowSystem />
