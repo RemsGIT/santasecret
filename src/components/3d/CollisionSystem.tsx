@@ -8,7 +8,7 @@ interface CollisionSystemProps {
   onCollisionDataReady?: (colliders: Mesh[]) => void
 }
 
-const collisionElements = ['House_1_Wood_1_0', 'House_2_Wood_1_0', 'House_3_Wood_1_0', 'House_4_Wood_1_0', 'House_5_Wood_1_0', 'house_6_Wood_1_0', 'House_7_Wood_1_0', 'House_8_Wood_1_0']
+const collisionElements = ['Axe_Wood_1_0', 'House_2_Wood_1_0', 'House_3_Wood_1_0', 'House_4_Wood_1_0', 'House_5_Wood_1_0', 'house_6_Wood_1_0', 'House_7_Wood_1_0', 'House_8_Wood_1_0']
 
 export default function CollisionSystem({
   modelPath,

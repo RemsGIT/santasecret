@@ -7,6 +7,7 @@ interface TargetedObject {
   name: string
   color: number // Couleur hex (ex: 0xff0000 pour rouge)
   flicker?: boolean // Scintillement optionnel (défaut: true)
+  power?: number // Puissance de la lumière (défaut: 0.8)
 }
 
 interface TargetedLightingProps {
@@ -27,6 +28,7 @@ export default function TargetedLighting({ modelPath, targetObjects: targets }: 
         const mesh = child as Mesh
         // Vérifier si le nom de l'objet correspond à un des objets ciblés
         targets.forEach(target => {
+          console.log(mesh.name)
           if (mesh.name.includes(target.name)) {
             console.log(`Objet trouvé: ${mesh.name} - couleur: #${target.color.toString(16)} - flicker: ${target.flicker ?? true}`)
             foundObjects.push({ mesh, target })
@@ -38,14 +40,14 @@ export default function TargetedLighting({ modelPath, targetObjects: targets }: 
                   const material = mat as any
                   if (material.emissive && material.emissiveIntensity !== undefined) {
                     material.emissive.setHex(target.color)
-                    material.emissiveIntensity = 0.8
+                    material.emissiveIntensity = target.power ?? 0.8
                   }
                 })
               } else {
                 const material = mesh.material as any
                 if (material.emissive && material.emissiveIntensity !== undefined) {
                   material.emissive.setHex(target.color)
-                  material.emissiveIntensity = 0.8
+                  material.emissiveIntensity = target.power ?? 0.8
                 }
               }
             }

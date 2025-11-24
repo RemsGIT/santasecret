@@ -8,6 +8,7 @@ import SnowSystem from './SnowSystem'
 import HouseSigns from './HouseSigns'
 import TargetedLighting from './TargetedLighting'
 import CollisionSystem from './CollisionSystem'
+import Animals from './Animals'
 import type { Mesh } from 'three'
 
 export default function SelectionScene() {
@@ -48,16 +49,14 @@ export default function SelectionScene() {
       <TargetedLighting
         modelPath="/models/scene.glb"
         targetObjects={[
-          { name: 'polySurface231_Deco3_0', color: 0x00ff00, flicker: true }, // Vert
-          { name: 'polySurface229_Deco2_0', color: 0x0066ff, flicker: true }, // Bleu
-          { name: 'polySurface199_Deco1_0', color: 0xff0000, flicker: true }, // Rouge
-          { name: 'polySurface228_Deco4_0', color: 0xFF00C7, flicker: true }, // Violet
           { name: 'Chrimah_Lights_3_Bulb_Blue_0', color: 0x0066ff, flicker: true }, // Guirlande bleue cabane
           { name: 'Chrimah_Lights_3_Bulb_Yeller1_0', color: 0xFBFF00, flicker: true }, // Guirlande jaune cabane
           { name: 'Chrimah_Lights_3_Bulb_Green1_0', color: 0x00ff00, flicker: true }, // Guirlande vert cabane
           { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true }, // Guirlande rouge cabane
-          { name: 'Lamp4_Window_Light_0', color: 0xE78D43, flicker: false }, // Lampadaire - fenetres orange chaud
-          { name: 'Chrimas_Star_Star_Mat_0', color: 0xFBFF00, flicker: false }, // Étoile
+          { name: 'House_1_Window_Light_0', color: 0xE78D43, flicker: false }, // Lampadaire - fenetres orange chaud
+          { name: 'polySurface4605_LP_set1_0', color: 0xFBFF00, flicker: false, power: 6 }, // Guirlandes sapin
+          { name: 'base_big_LP_set2_0', color: 0x00ff00, flicker: false, power: 20 }, // Sapin + base
+          { name: 'base_big_LP_set2_0', color: 0x036A36, flicker: false, power: 0.04 }, // Sapin + base
         ]}
       />
 
@@ -87,6 +86,9 @@ function GameScene() {
 
       {/* Pancartes des maisons */}
       <HouseSigns />
+
+      {/* Animaux et niches */}
+      <Animals />
     </>
   )
 }

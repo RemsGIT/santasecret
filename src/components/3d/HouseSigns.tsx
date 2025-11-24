@@ -2,59 +2,113 @@ import { Text, useGLTF } from '@react-three/drei'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useFrame, useThree } from '@react-three/fiber'
+import { Vector3 } from 'three'
 import { people } from '../../data/people'
 import ParticipantPicture from './ParticipantPicture'
 import type { Mesh } from 'three'
-import { Vector3 } from 'three'
 
-// Composant pour les particules scintillantes
-function StarParticles() {
-  const particlesRef = useRef<Array<Mesh>>(Array(6).fill(null))
+// Composant UI Gaming avec effet d'apparition épique
+interface GameUIPromptProps {
+  opacity: number
+  animationProgress: number
+  personName: string
+  position: [number, number, number]
+}
+
+function GameUIPrompt({ opacity, animationProgress, personName, position }: GameUIPromptProps) {
+  const groupRef = useRef<any>(null)
 
   useFrame((state) => {
+    if (!groupRef.current) return
+
     const time = state.clock.elapsedTime
 
-    particlesRef.current.forEach((particle, index) => {
-      if (particle) {
-        // Animation de rotation et de scintillement
-        const phase = time * 2 + index * Math.PI / 3
-        const radius = 0.8 + Math.sin(phase) * 0.2
-        const angle = (index * Math.PI * 2) / 6 + time * 0.5
-
-        particle.position.set(
-          Math.cos(angle) * radius,
-          0.1 + Math.sin(phase * 1.5) * 0.05,
-          Math.sin(angle) * radius
-        )
-
-        // Scintillement de l'opacité
-        const material = particle.material as any
-        material.opacity = 0.3 + Math.sin(phase * 3) * 0.3
-
-        // Rotation
-        particle.rotation.z = time + index
-      }
-    })
+    // Animation de respiration douce
+    const breathe = Math.sin(time * 1.5) * 0.01
+    groupRef.current.scale.set(
+      1 + breathe * 0.1,
+      1 + breathe * 0.1,
+      1
+    )
   })
 
+  // Animations basées sur le progress
+  const slideDistance = (1 - animationProgress) * 0.2  // Slide depuis le haut
+  const currentScale = animationProgress  // Linear pour plus de fluidité
+  const textOpacity = Math.max(0, (animationProgress - 0.2) / 0.8)  // Texte apparaît plus tôt
+
   return (
-    <group position={[-0.08, 0, 0]}>
-      {Array.from({ length: 6 }, (_, i) => (
-        <mesh
-          key={i}
-          ref={(el) => {
-            if (el) particlesRef.current[i] = el
-          }}
-        >
-          <planeGeometry args={[0.08, 0.08]} />
-          <meshBasicMaterial
-            color="#ffff00"
-            transparent
-            opacity={0.6}
-            depthWrite={false}
-          />
-        </mesh>
-      ))}
+    <group ref={groupRef} position={[position[0], position[1] - slideDistance, position[2]]}>
+      {/* Fond principal arrondi style moderne */}
+      <mesh position={[0, 0, -0.01]}>
+        <planeGeometry args={[2.4, 0.5]} />
+        <meshBasicMaterial
+          color="#ffffff"
+          transparent
+          opacity={0.95 * opacity * currentScale}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Bordure colorée */}
+      <mesh position={[0, 0, 0]}>
+        <planeGeometry args={[2.5, 0.55]} />
+        <meshBasicMaterial
+          color="#4f46e5"  // Violet moderne
+          transparent
+          opacity={0.8 * opacity * currentScale}
+          depthWrite={false}
+        />
+      </mesh>
+
+      {/* Icône personnage à gauche */}
+      <Text
+        position={[-0.8, 0, 0.01]}
+        fontSize={0.2}
+        color={`rgba(79, 70, 229, ${opacity * textOpacity})`}
+        anchorX="center"
+        anchorY="middle"
+      >
+        🏠
+      </Text>
+
+      {/* Texte principal */}
+      <Text
+        position={[0.1, 0.08, 0.01]}
+        fontSize={0.08}
+        color={`rgba(79, 70, 229, ${opacity * textOpacity})`}
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={2}
+        textAlign="center"
+        fontWeight={600}
+      >
+        Entrer chez {personName}
+      </Text>
+
+      {/* Sous-texte avec la touche */}
+      <Text
+        position={[0.1, -0.08, 0.01]}
+        fontSize={0.06}
+        color={`rgba(107, 114, 128, ${opacity * textOpacity * 0.8})`}
+        anchorX="center"
+        anchorY="middle"
+        maxWidth={2}
+        textAlign="center"
+      >
+        Appuyer sur E
+      </Text>
+
+      {/* Flèche indicative */}
+      <Text
+        position={[0.9, 0, 0.01]}
+        fontSize={0.15}
+        color={`rgba(79, 70, 229, ${opacity * textOpacity})`}
+        anchorX="center"
+        anchorY="middle"
+      >
+        →
+      </Text>
     </group>
   )
 }
@@ -71,6 +125,7 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
   const signRef = useRef<Mesh>(null)
   const [isNear, setIsNear] = useState(false)
   const [opacity, setOpacity] = useState(0)
+  const [animationProgress, setAnimationProgress] = useState(0)
   const navigate = useNavigate()
   const { camera } = useThree()
 
@@ -85,7 +140,7 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
   }, [scene])
 
   // Détection de proximité avec le joueur et animation
-  useFrame(() => {
+  useFrame((state) => {
     // Position de la pancarte
     const signPosition = new Vector3(...position)
     // Position du joueur (caméra)
@@ -102,18 +157,27 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
     // Mettre à jour l'état de proximité
     setIsNear(newIsNear)
 
-    // Animation fluide d'apparition/disparition
+    // Animation dramatique d'apparition/disparition
     if (newIsNear && !wasNear) {
-      // Apparition
+      // Reset de l'animation à l'apparition
+      setAnimationProgress(0)
       setOpacity(0)
     }
 
-    // Animer l'opacité vers la cible
+    // Animation progressive pour l'effet WOW
     const targetOpacity = newIsNear ? 1 : 0
+    const targetProgress = newIsNear ? 1 : 0
+
     setOpacity(prev => {
-      const speed = 0.05
+      const speed = newIsNear ? 0.08 : 0.06  // Plus rapide à l'apparition
       const diff = targetOpacity - prev
       return Math.abs(diff) < 0.01 ? targetOpacity : prev + diff * speed
+    })
+
+    setAnimationProgress(prev => {
+      const speed = newIsNear ? 0.12 : 0.08  // Animation du progress plus dynamique
+      const diff = targetProgress - prev
+      return Math.abs(diff) < 0.01 ? targetProgress : prev + diff * speed
     })
   })
 
@@ -158,42 +222,14 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
         {personName}
       </Text>
 
-      {/* Instruction "Press E" avec effet WOW */}
+      {/* Interface Gaming avec effet WOW d'apparition */}
       {opacity > 0 && (
-        <group scale={[0.8 + opacity * 0.2, 0.8 + opacity * 0.2, 1]}>
-          {/* Effet de glow/halo derrière le texte */}
-          <mesh position={[-0.08, 0.1, 0.11]}>
-            <planeGeometry args={[1.5, 0.2]} />
-            <meshBasicMaterial
-              color="#ffff00"
-              opacity={0.1 * opacity}
-              transparent
-              depthWrite={false}
-            />
-          </mesh>
-
-          {/* Texte principal avec animation */}
-          <Text
-            position={[-0.08, 0.1, 0.12]}
-            fontSize={0.08}
-            color={`rgba(255, 255, 255, ${opacity})`}
-            anchorX="center"
-            anchorY="middle"
-            maxWidth={2}
-            textAlign="center"
-            outlineWidth={0.005}
-            outlineColor={`rgba(255, 255, 0, ${opacity})`}
-            strokeWidth={0.01}
-            strokeColor={`rgba(0, 0, 0, ${opacity * 0.8})`}
-          >
-            Appuie sur E pour rentrer chez {personName}
-          </Text>
-
-          {/* Particules scintillantes autour du texte */}
-          <group scale={[opacity, opacity, opacity]}>
-            <StarParticles />
-          </group>
-        </group>
+        <GameUIPrompt
+          opacity={opacity}
+          animationProgress={animationProgress}
+          personName={personName}
+          position={[-0.08, 0.15, 0.12]}
+        />
       )}
     </group>
   )
