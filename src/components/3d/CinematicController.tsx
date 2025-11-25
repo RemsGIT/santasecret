@@ -21,65 +21,62 @@ export default function CinematicController() {
 
         const elapsed = (Date.now() - cinematicStartTime) / 1000
 
-        // Phase 1 (0-5s): Dézoom du personnage pour voir earth.glb à la place de la scène
-        if (elapsed < 5) {
-            const t = elapsed / 5
+        // Phase 1 (0-4s): Dézoom du personnage pour voir earth.glb
+        if (elapsed < 4) {
+            const t = elapsed / 4
             const eased = easeInOutQuad(t)
             
             camera.position.lerpVectors(
                 startPosRef.current,
-                new Vector3(0, 10, 50), // Position pour voir earth.glb en entier
+                new Vector3(0, 5, 30), // Position plus proche pour voir earth.glb
                 eased
             )
-            camera.lookAt(0, 0, 0) // Regarder earth.glb au centre
+            camera.lookAt(0, 0, 0)
         }
-        // Phase 2 (5-8s): Pause pour voir earth.glb qui rotate à la place de la scène
-        else if (elapsed < 8) {
-            camera.position.set(0, 10, 50)
-            camera.lookAt(0, 0, 0) // Regarder earth.glb
+        // Phase 2 (4-7s): Pause sur earth.glb
+        else if (elapsed < 7) {
+            camera.position.set(0, 5, 30)
+            camera.lookAt(0, 0, 0)
         }
-        // Phase 3 (8-12s): Avancer en passant derrière earth.glb
+        // Phase 3 (7-12s): Voyage direct vers galaxy.glb
         else if (elapsed < 12) {
-            const t = (elapsed - 8) / 4
+            const t = (elapsed - 7) / 5
             const eased = easeInOutQuad(t)
             
+            // Transition fluide vers la galaxie
             camera.position.lerpVectors(
-                new Vector3(0, 10, 50),
-                new Vector3(0, 0, -30), // Passer derrière earth.glb
+                new Vector3(0, 5, 30),
+                new Vector3(0, 0, 800),
                 eased
             )
-            camera.lookAt(0, 0, 0) // Continuer à regarder earth.glb
-        }
-        // Phase 4 (12-15s): Voyage vers galaxy.glb
-        else if (elapsed < 15) {
-            const t = (elapsed - 12) / 3
-            const eased = easeInOutQuad(t)
             
-            camera.position.lerpVectors(
-                new Vector3(0, 0, -30),
-                new Vector3(0, 0, 800), // Devant galaxy.glb
+            // Transition du regard terre → galaxie
+            const lookTarget = new Vector3()
+            lookTarget.lerpVectors(
+                new Vector3(0, 0, 0),     // Regarder earth.glb
+                new Vector3(0, 0, 1000),  // Regarder galaxy.glb
                 eased
             )
-            camera.lookAt(0, 0, 1000) // Regarder galaxy.glb
+            camera.lookAt(lookTarget)
         }
-        // Phase 5 (15-17s): Pause devant galaxy.glb
-        else if (elapsed < 17) {
+        // Phase 4 (12-14s): Pause devant galaxy.glb
+        else if (elapsed < 14) {
             camera.position.set(0, 0, 800)
-            camera.lookAt(0, 0, 1000) // Regarder galaxy.glb
+            camera.lookAt(0, 0, 1000)
         }
-        // Phase 6 (17-20s): Traverser galaxy.glb au centre
-        else if (elapsed < 20) {
-            const t = (elapsed - 17) / 3
+        // Phase 5 (14-16s): Traverser galaxy.glb
+        else if (elapsed < 16) {
+            const t = (elapsed - 14) / 2
             const eased = easeInOutQuad(t)
             
             camera.position.lerpVectors(
                 new Vector3(0, 0, 800),
-                new Vector3(0, 0, 1200), // Traverser au centre
+                new Vector3(0, 0, 1200),
                 eased
             )
-            camera.lookAt(0, 0, 1300) // Regarder vers l'avant
+            camera.lookAt(0, 0, 1300)
         }
-        // Fin - Position finale pour le reveal
+        // Fin - Position finale
         else {
             camera.position.set(0, 0, 1200)
             camera.lookAt(0, 0, 1300)
