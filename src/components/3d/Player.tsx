@@ -3,7 +3,8 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { Euler, Vector3 } from 'three'
 import useKeyboardControls from '../../hooks/useKeyboardControls'
 import { checkHousesCollision } from './CollisionSystem'
-import type { Mesh, SpotLight} from 'three';
+import type { Mesh, SpotLight } from 'three';
+import { useGame } from '../../context/GameContext'
 
 interface PlayerProps {
   houses?: Mesh[]
@@ -12,8 +13,10 @@ interface PlayerProps {
 const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
   const playerRef = ref as React.RefObject<Mesh>
   const spotLightRef = useRef<SpotLight>(null)
-  const { getMovementVector } = useKeyboardControls()
+  const { getMovementVector, isKeyPressed } = useKeyboardControls()
   const { camera } = useThree()
+  const { cinematicActive, startCinematic } = useGame()
+  const eKeyPressedRef = useRef(false)
 
   // Vitesse de déplacement (réduite pour éviter la téléportation)
   const speed = 0.02
@@ -62,6 +65,15 @@ const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
 
   useFrame(() => {
     if (!spotLightRef.current) return
+    if (cinematicActive) return
+
+    // Détection de la touche E pour lancer la cinématique (une seule fois)
+    const eKeyPressed = isKeyPressed('KeyE')
+    if (eKeyPressed && !eKeyPressedRef.current && !cinematicActive) {
+      // Déclencher la cinématique avec un ID de joueur (1 pour test)
+      startCinematic(1)
+    }
+    eKeyPressedRef.current = eKeyPressed
 
     const { x, z } = getMovementVector()
 

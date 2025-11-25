@@ -1,5 +1,6 @@
 import { useGLTF } from '@react-three/drei'
 import { Suspense, useEffect } from 'react'
+import { useGame } from '../../context/GameContext'
 
 export default function SceneMap() {
   return (

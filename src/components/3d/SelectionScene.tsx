@@ -10,11 +10,15 @@ import TargetedLighting from './TargetedLighting'
 import CollisionSystem from './CollisionSystem'
 import Animals from './Animals'
 import NightSky from './NightSky'
+import CinematicController from './CinematicController'
+import SpaceEnvironment from './SpaceEnvironment'
 import type { Mesh } from 'three'
 import { InteractionContext, useInteraction } from '../../context/InteractionContext'
+import { useGame } from '../../context/GameContext'
 
 export default function SelectionScene() {
   const interactionContext = useInteraction()
+  const { cinematicActive } = useGame()
   return (
     <Canvas
       camera={{
@@ -44,30 +48,40 @@ export default function SelectionScene() {
           enableZoom={false}
           enableRotate={false}
           target={new Vector3(0, 0, 0)}
+          enabled={!cinematicActive}
         />
 
-        {/* Map de Noël */}
-        <SceneMap />
+        {/* Éléments visibles seulement quand pas en cinématique */}
+        {!cinematicActive && (
+          <>
+            {/* Map de Noël */}
+            <SceneMap />
 
-        {/* Illuminer les boules de Noël avec leurs couleurs */}
-        <TargetedLighting
-          modelPath="/models/scene.glb"
-          targetObjects={[
-            { name: 'Chrimah_Lights_3_Bulb_Blue_0', color: 0x0066ff, flicker: true }, // Guirlande bleue cabane
-            { name: 'Chrimah_Lights_3_Bulb_Yeller1_0', color: 0xFBFF00, flicker: true }, // Guirlande jaune cabane
-            { name: 'Chrimah_Lights_3_Bulb_Green1_0', color: 0x00ff00, flicker: true }, // Guirlande vert cabane
-            { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true }, // Guirlande rouge cabane
-            { name: 'House_1_Window_Light_0', color: 0xE78D43, flicker: false }, // Lampadaire - fenetres orange chaud
-            { name: 'polySurface4605_LP_set1_0', color: 0xFBFF00, flicker: false, power: 6 }, // Guirlandes sapin
-            { name: 'base_big_LP_set2_0', color: 0x036A36, flicker: false, power: 0.04 }, // Sapin + base
-          ]}
-        />
+            {/* Illuminer les boules de Noël avec leurs couleurs */}
+            <TargetedLighting
+              modelPath="/models/scene.glb"
+              targetObjects={[
+                { name: 'Chrimah_Lights_3_Bulb_Blue_0', color: 0x0066ff, flicker: true }, // Guirlande bleue cabane
+                { name: 'Chrimah_Lights_3_Bulb_Yeller1_0', color: 0xFBFF00, flicker: true }, // Guirlande jaune cabane
+                { name: 'Chrimah_Lights_3_Bulb_Green1_0', color: 0x00ff00, flicker: true }, // Guirlande vert cabane
+                { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true }, // Guirlande rouge cabane
+                { name: 'House_1_Window_Light_0', color: 0xE78D43, flicker: false }, // Lampadaire - fenetres orange chaud
+                { name: 'polySurface4605_LP_set1_0', color: 0xFBFF00, flicker: false, power: 6 }, // Guirlandes sapin
+                { name: 'base_big_LP_set2_0', color: 0x036A36, flicker: false, power: 0.04 }, // Sapin + base
+              ]}
+            />
 
-        {/* Ciel étoilé avec lune */}
-        <NightSky />
+            {/* Ciel étoilé avec lune */}
+            <NightSky />
 
-        {/* Effets de neige */}
-        <SnowSystem />
+            {/* Effets de neige */}
+            <SnowSystem />
+          </>
+        )}
+
+        {/* Cinématique - toujours présente */}
+        <SpaceEnvironment />
+        <CinematicController />
 
         {/* Scène de jeu */}
         <GameScene />
@@ -79,6 +93,7 @@ export default function SelectionScene() {
 function GameScene() {
   const playerRef = useRef(null)
   const [houses, setHouses] = useState<Mesh[]>([])
+  const { cinematicActive } = useGame()
 
   return (
     <>
@@ -91,11 +106,16 @@ function GameScene() {
       {/* Joueur avec lampe torche et collision */}
       <Player ref={playerRef} houses={houses} />
 
-      {/* Pancartes des maisons */}
-      <HouseSigns />
+      {/* Éléments visibles seulement quand pas en cinématique */}
+      {!cinematicActive && (
+        <>
+          {/* Pancartes des maisons */}
+          <HouseSigns />
 
-      {/* Animaux et niches */}
-      <Animals />
+          {/* Animaux et niches */}
+          <Animals />
+        </>
+      )}
     </>
   )
 }

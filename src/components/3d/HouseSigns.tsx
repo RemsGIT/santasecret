@@ -1,12 +1,12 @@
 import { Text, useGLTF } from '@react-three/drei'
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Vector3 } from 'three'
 import { people } from '../../data/people'
 import ParticipantPicture from './ParticipantPicture'
 import type { Mesh } from 'three'
 import { useInteraction } from '../../context/InteractionContext'
+import { useGame } from '../../context/GameContext'
 
 interface HouseSignProps {
   position: [number, number, number]
@@ -19,9 +19,9 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
   const { scene } = useGLTF('/models/wooden-sign-enter.glb')
   const signRef = useRef<Mesh>(null)
   const [isNear, setIsNear] = useState(false)
-  const navigate = useNavigate()
   const { camera } = useThree()
   const { setInteraction } = useInteraction()
+  const { startCinematic } = useGame()
 
   useEffect(() => {
     // Configurer le modèle
@@ -76,17 +76,16 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() === 'e' && isNear) {
-        // Libérer le pointeur avant la navigation
-        if (document.pointerLockElement) {
-          document.exitPointerLock()
-        }
-        navigate({ to: `/person/${personId}` })
+        // Libérer le pointeur pour l'interaction (optionnel si on veut cliquer)
+        // Mais pour la cinématique on veut peut-être garder le lock ou pas.
+        // On lance la cinématique
+        startCinematic(personId)
       }
     }
 
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isNear, navigate, personId])
+  }, [isNear, personId, startCinematic])
 
   return (
     <group position={position} rotation={rotation}>

@@ -9,6 +9,7 @@ interface KeyState {
   KeyS: boolean
   KeyA: boolean
   KeyD: boolean
+  KeyE: boolean
 }
 
 export default function useKeyboardControls() {
@@ -21,6 +22,7 @@ export default function useKeyboardControls() {
     KeyS: false,
     KeyA: false,
     KeyD: false,
+    KeyE: false,
   })
 
   useEffect(() => {
@@ -29,14 +31,20 @@ export default function useKeyboardControls() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code in keysRef.current) {
         keysRef.current[event.code as keyof KeyState] = true
-        event.preventDefault()
+        // Seulement prévenir pour les touches de mouvement, pas E
+        if (event.code !== 'KeyE') {
+          event.preventDefault()
+        }
       }
     }
 
     const handleKeyUp = (event: KeyboardEvent) => {
       if (event.code in keysRef.current) {
         keysRef.current[event.code as keyof KeyState] = false
-        event.preventDefault()
+        // Seulement prévenir pour les touches de mouvement, pas E
+        if (event.code !== 'KeyE') {
+          event.preventDefault()
+        }
       }
     }
 
@@ -85,5 +93,7 @@ export default function useKeyboardControls() {
     return { x, z }
   }
 
-  return { getMovementVector, keysRef }
+  const isKeyPressed = (key: keyof KeyState) => keysRef.current[key]
+
+  return { getMovementVector, isKeyPressed, keysRef }
 }
