@@ -1,16 +1,16 @@
 import { Stars, useGLTF } from '@react-three/drei'
-import { useGame } from '../../context/GameContext'
 import { useFrame } from '@react-three/fiber'
-import { useRef, Suspense, useState } from 'react'
+import { Suspense, useRef, useState } from 'react'
+import { useGame } from '../../context/GameContext'
 import type { Group } from 'three'
 
-function EarthModel({ opacity = 1 }: { opacity?: number }) {
+function EarthModel({ opacity = 1, elapsed }: { opacity?: number, elapsed: number }) {
     const earth = useGLTF('/models/earth.glb')
     const earthRef = useRef<Group>(null)
 
     useFrame(() => {
         if (earthRef.current) {
-            earthRef.current.rotation.y += 0.01 // Rotation de la terre
+            earthRef.current.rotation.y += 0.005 // Rotation très douce de la terre
             // Appliquer l'opacity aux matériaux
             earthRef.current.traverse((child: any) => {
                 if (child.material) {
@@ -21,8 +21,18 @@ function EarthModel({ opacity = 1 }: { opacity?: number }) {
         }
     })
 
+    // Échelle fixe : earth.glb apparaît directement à une bonne taille, vue de l'extérieur
+    let scale = 1.5 // Taille raisonnable pour être bien visible
+    if (elapsed >= 4 && elapsed < 8) {
+        // Léger dézoom progressif pour mieux voir
+        const earthElapsed = elapsed - 4
+        scale = 1.5 - (earthElapsed * 0.125) // De 1.5 à 1 en 4 secondes
+    } else if (elapsed >= 8) {
+        scale = 1 // Taille finale
+    }
+
     return (
-        <group ref={earthRef} position={[0, 0, 0]} scale={[0.5, 0.5, 0.5]}>
+        <group ref={earthRef} position={[0, 0, 50]} scale={[scale, scale, scale]}>
             <primitive object={earth.scene.clone()} />
         </group>
     )
@@ -32,34 +42,36 @@ function GalaxyModel() {
     const galaxy = useGLTF('/models/galaxy.glb')
     const galaxyRef = useRef<Group>(null)
 
-
     return (
-        <group ref={galaxyRef} position={[0, 0, 1000]} scale={[30, 30, 30]}>
+        <group ref={galaxyRef} position={[0, 0, 1000]} scale={[30, 30, 30]} rotation={[0, 0, 0]}>
             <primitive object={galaxy.scene.clone()} />
         </group>
     )
 }
 
-// Précharger earth.glb pour une transition instantanée
+// Précharger tous les assets pour éviter les freezes
 useGLTF.preload('/models/earth.glb')
+useGLTF.preload('/models/galaxy.glb')
 
 export default function SpaceEnvironment() {
     const { cinematicActive, cinematicStartTime } = useGame()
     const [spaceOpacity, setSpaceOpacity] = useState(0)
+    const [elapsed, setElapsed] = useState(0)
 
     useFrame(() => {
         if (!cinematicActive || !cinematicStartTime) return
 
-        const elapsed = (Date.now() - cinematicStartTime) / 1000
-        
+        const currentElapsed = (Date.now() - cinematicStartTime) / 1000
+        setElapsed(currentElapsed)
+
         // Transition progressive entre 2.5s et 3.5s pour un fade smooth
         let targetOpacity = 0
-        if (elapsed >= 2.5 && elapsed < 3.5) {
-            targetOpacity = elapsed - 2.5 // Fade in sur 1 seconde
-        } else if (elapsed >= 3.5) {
+        if (currentElapsed >= 2.5 && currentElapsed < 3.5) {
+            targetOpacity = currentElapsed - 2.5 // Fade in sur 1 seconde
+        } else if (currentElapsed >= 3.5) {
             targetOpacity = 1
         }
-        
+
         if (Math.abs(targetOpacity - spaceOpacity) > 0.01) {
             setSpaceOpacity(targetOpacity)
         }
@@ -76,7 +88,7 @@ export default function SpaceEnvironment() {
 
                     {/* Chargement des modèles avec fade progressif */}
                     <Suspense fallback={null}>
-                        <EarthModel opacity={spaceOpacity} />
+                        <EarthModel opacity={spaceOpacity} elapsed={elapsed} />
                         <GalaxyModel />
                     </Suspense>
 

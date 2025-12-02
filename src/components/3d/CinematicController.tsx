@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react'
 export default function CinematicController() {
     const { cinematicActive, cinematicStartTime } = useGame()
     const { camera } = useThree()
-    
+
     const startPosRef = useRef(new Vector3())
 
     useEffect(() => {
@@ -25,18 +25,18 @@ export default function CinematicController() {
         if (elapsed < 3) {
             const t = elapsed / 3
             const eased = easeInOutQuad(t)
-            
+
             // Dézoom vertical progressif : monter très haut pour voir scene.glb comme une petite planète
             camera.position.lerpVectors(
                 startPosRef.current,
-                new Vector3(0, 200, 150), // Montée très haute pour rendre scene.glb minuscule
+                new Vector3(0, 150, 100), // Montée très haute pour rendre scene.glb minuscule
                 eased
             )
-            
+
             // Regarder vers le bas/centre progressivement
             const lookTarget = new Vector3()
             const playerLookTarget = startPosRef.current.clone().add(new Vector3(0, -2, 0))
-            
+
             lookTarget.lerpVectors(
                 playerLookTarget,
                 new Vector3(0, 0, 0), // Regarder vers le centre
@@ -44,58 +44,45 @@ export default function CinematicController() {
             )
             camera.lookAt(lookTarget)
         }
-        // Phase 2 (3-4s): Transition et positionnement pour earth.glb
-        else if (elapsed < 4) {
-            camera.position.set(0, 200, 150) // Maintenir position haute
-            camera.lookAt(0, 0, 0)
+        // Phase 2 (3-8s): Maintenir position pour voir earth.glb
+        else if (elapsed < 8) {
+            camera.position.set(0, 150, 100) // Position fixe pour voir earth.glb
+            camera.lookAt(0, 0, 0) // Regarder vers earth.glb (position Z=50)
         }
-        // Phase 3 (4-6s): Repositionnement plus distant pour voir earth.glb
-        else if (elapsed < 6) {
-            const t = Math.min((elapsed - 4) / 1, 1) // Transition rapide 1s puis pause
-            const eased = easeInOutQuad(t)
-            
-            if (elapsed < 5) {
-                camera.position.lerpVectors(
-                    new Vector3(0, 200, 150),
-                    new Vector3(0, 50, 120), // Position plus éloignée d'earth.glb
-                    eased
-                )
-            } else {
-                camera.position.set(0, 50, 120) // Pause à distance
-            }
-            camera.lookAt(0, 0, 0)
-        }
-        // Phase 4 (6-10s): Foncer vers galaxy.glb rapidement
+        // Phase 3 (8-12s): Foncer vers galaxy.glb
         else if (elapsed < 10) {
-            const t = (elapsed - 6) / 4
+            const t = (elapsed - 8) / 4
             const eased = easeInOutQuad(t)
-            
+
             // Transition rapide vers la galaxie
             camera.position.lerpVectors(
-                new Vector3(0, 50, 120),
-                new Vector3(0, 0, 800),
+                new Vector3(0, 150, 100), // Partir de la position actuelle
+                new Vector3(0, 120, -800),   // Arriver devant la galaxie
                 eased
             )
-            
+
+          /*
             // Transition du regard terre → galaxie
             const lookTarget = new Vector3()
             lookTarget.lerpVectors(
-                new Vector3(0, 0, 0),     // Regarder earth.glb
+                new Vector3(0, 0, 50),    // Regarder earth.glb
                 new Vector3(0, 0, 1000),  // Regarder galaxy.glb
                 eased
             )
             camera.lookAt(lookTarget)
+
+           */
         }
-        // Phase 5 (10-12s): Pause devant galaxy.glb
+        // Phase 4 (12-14s): Pause devant galaxy.glb
         else if (elapsed < 12) {
             camera.position.set(0, 0, 800)
             camera.lookAt(0, 0, 1000)
         }
-        // Phase 6 (12-14s): Traverser galaxy.glb
-        else if (elapsed < 14) {
-            const t = (elapsed - 12) / 2
+        // Phase 5 (14-16s): Traverser galaxy.glb
+        else if (elapsed < 16) {
+            const t = (elapsed - 14) / 2
             const eased = easeInOutQuad(t)
-            
+
             camera.position.lerpVectors(
                 new Vector3(0, 0, 800),
                 new Vector3(0, 0, 1200),
