@@ -1,4 +1,4 @@
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment, OrbitControls } from '@react-three/drei'
 import { Vector3 } from 'three'
 import { useRef, useState } from 'react'
@@ -15,6 +15,10 @@ import SpaceEnvironment from './SpaceEnvironment'
 import type { Mesh } from 'three'
 import { InteractionContext, useInteraction } from '../../context/InteractionContext'
 import { useGame } from '../../context/GameContext'
+import { useGLTF } from '@react-three/drei'
+
+// Précharger earth.glb dès le chargement du composant principal
+useGLTF.preload('/models/earth.glb')
 
 export default function SelectionScene() {
   const interactionContext = useInteraction()
@@ -51,26 +55,12 @@ export default function SelectionScene() {
           enabled={!cinematicActive}
         />
 
-        {/* Éléments visibles seulement quand pas en cinématique */}
+        {/* Scène de jeu visible jusqu'à transition vers espace */}
+        <GameSceneElements />
+
+        {/* Éléments UI/décorations - cachés pendant cinématique */}
         {!cinematicActive && (
           <>
-            {/* Map de Noël */}
-            <SceneMap />
-
-            {/* Illuminer les boules de Noël avec leurs couleurs */}
-            <TargetedLighting
-              modelPath="/models/scene.glb"
-              targetObjects={[
-                { name: 'Chrimah_Lights_3_Bulb_Blue_0', color: 0x0066ff, flicker: true }, // Guirlande bleue cabane
-                { name: 'Chrimah_Lights_3_Bulb_Yeller1_0', color: 0xFBFF00, flicker: true }, // Guirlande jaune cabane
-                { name: 'Chrimah_Lights_3_Bulb_Green1_0', color: 0x00ff00, flicker: true }, // Guirlande vert cabane
-                { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true }, // Guirlande rouge cabane
-                { name: 'House_1_Window_Light_0', color: 0xE78D43, flicker: false }, // Lampadaire - fenetres orange chaud
-                { name: 'polySurface4605_LP_set1_0', color: 0xFBFF00, flicker: false, power: 6 }, // Guirlandes sapin
-                { name: 'base_big_LP_set2_0', color: 0x036A36, flicker: false, power: 0.04 }, // Sapin + base
-              ]}
-            />
-
             {/* Ciel étoilé avec lune */}
             <NightSky />
 
@@ -90,9 +80,52 @@ export default function SelectionScene() {
   )
 }
 
+function GameSceneElements() {
+  const { cinematicActive, cinematicStartTime } = useGame()
+  const [showScene, setShowScene] = useState(true)
+
+  useFrame(() => {
+    if (!cinematicActive || !cinematicStartTime) {
+      if (!showScene) setShowScene(true)
+      return
+    }
+
+    const elapsed = (Date.now() - cinematicStartTime) / 1000
+    // Cacher la scène exactement quand earth.glb remplace scene.glb (fin de phase 2)
+    const shouldShowScene = elapsed < 10
+    
+    if (shouldShowScene !== showScene) {
+      setShowScene(shouldShowScene)
+    }
+  })
+
+  if (!showScene && cinematicActive) return null
+
+  return (
+    <>
+      {/* Map de Noël */}
+      <SceneMap />
+
+      {/* Illuminer les boules de Noël avec leurs couleurs */}
+      <TargetedLighting
+        modelPath="/models/scene.glb"
+        targetObjects={[
+          { name: 'Chrimah_Lights_3_Bulb_Blue_0', color: 0x0066ff, flicker: true },
+          { name: 'Chrimah_Lights_3_Bulb_Yeller1_0', color: 0xFBFF00, flicker: true },
+          { name: 'Chrimah_Lights_3_Bulb_Green1_0', color: 0x00ff00, flicker: true },
+          { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true },
+          { name: 'House_1_Window_Light_0', color: 0xE78D43, flicker: false },
+          { name: 'polySurface4605_LP_set1_0', color: 0xFBFF00, flicker: false, power: 6 },
+          { name: 'base_big_LP_set2_0', color: 0x036A36, flicker: false, power: 0.04 },
+        ]}
+      />
+    </>
+  )
+}
+
 function GameScene() {
   const playerRef = useRef(null)
-  const [houses, setHouses] = useState<Mesh[]>([])
+  const [houses, setHouses] = useState<Array<Mesh>>([])
   const { cinematicActive } = useGame()
 
   return (
