@@ -17,14 +17,13 @@ function HomePage() {
             fallback={
               <div className="h-screen w-screen bg-black flex items-center justify-center">
                 <div className="text-white text-xl font-light tracking-widest animate-pulse">
-                  CHARGEMENT DU PÔLE NORD...
+                  CHARGEMENT DU SECRET SANTA 2025
                 </div>
               </div>
             }
           >
             <SelectionScene />
             <InteractionPopup />
-            <CinematicReveal />
           </Suspense>
         </div>
       </InteractionProvider>

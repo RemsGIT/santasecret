@@ -24,14 +24,12 @@ export default function CollisionSystem({
       if ((child as any).isMesh) {
         const mesh = child as Mesh
         if (collisionElements.includes(mesh.name)) {
-          console.log(`Maison trouvée: ${mesh.name}`)
           foundHouses.push(mesh)
         }
       }
     })
 
     housesRef.current = foundHouses
-    console.log(`${foundHouses.length} maisons trouvées pour collision`)
 
     if (onCollisionDataReady) {
       onCollisionDataReady(foundHouses)

@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Environment, OrbitControls } from '@react-three/drei'
+import { Environment, OrbitControls, Stars } from '@react-three/drei'
 import { Vector3 } from 'three'
 import { useRef, useState } from 'react'
 import Player from './Player'
@@ -13,7 +13,10 @@ import NightSky from './NightSky'
 import CinematicController from './CinematicController'
 import SpaceEnvironment from './SpaceEnvironment'
 import type { Mesh } from 'three'
-import { InteractionContext, useInteraction } from '../../context/InteractionContext'
+import {
+  InteractionContext,
+  useInteraction,
+} from '../../context/InteractionContext'
 import { useGame } from '../../context/GameContext'
 import { useGLTF } from '@react-three/drei'
 
@@ -29,20 +32,12 @@ export default function SelectionScene() {
         position: [0, 3, 6],
         fov: 100,
         near: 0.5,
-        far: 1000
+        far: 1000,
       }}
       shadows
       className="h-full w-full"
     >
       <InteractionContext.Provider value={interactionContext}>
-        {/* Éclairage global très faible pour créer l'ambiance de nuit profonde */}
-
-        <ambientLight intensity={1} color="#0a0a1a" />
-        <hemisphereLight
-          groundColor="#050510"
-          intensity={0.002}
-        />
-
         {/* Environnement sombre */}
         <Environment preset="night" environmentIntensity={0.2} />
 
@@ -58,12 +53,19 @@ export default function SelectionScene() {
         {/* Scène de jeu visible jusqu'à transition vers espace */}
         <GameSceneElements />
 
+        <Stars
+          radius={0}
+          depth={200}
+          count={5000}
+          factor={10}
+          saturation={0}
+          fade
+          speed={0.5}
+        />
+
         {/* Éléments UI/décorations - cachés pendant cinématique */}
         {!cinematicActive && (
           <>
-            {/* Ciel étoilé avec lune */}
-            <NightSky />
-
             {/* Effets de neige */}
             <SnowSystem />
           </>
@@ -93,7 +95,7 @@ function GameSceneElements() {
     const elapsed = (Date.now() - cinematicStartTime) / 1000
     // Cacher la scène exactement quand earth.glb remplace scene.glb (fin de phase 2)
     const shouldShowScene = elapsed < 10
-    
+
     if (shouldShowScene !== showScene) {
       setShowScene(shouldShowScene)
     }
@@ -110,13 +112,39 @@ function GameSceneElements() {
       <TargetedLighting
         modelPath="/models/scene.glb"
         targetObjects={[
-          { name: 'Chrimah_Lights_3_Bulb_Blue_0', color: 0x0066ff, flicker: true },
-          { name: 'Chrimah_Lights_3_Bulb_Yeller1_0', color: 0xFBFF00, flicker: true },
-          { name: 'Chrimah_Lights_3_Bulb_Green1_0', color: 0x00ff00, flicker: true },
-          { name: 'Chrimah_Lights_3_Bulb_red_0', color: 0xff0000, flicker: true },
-          { name: 'House_1_Window_Light_0', color: 0xE78D43, flicker: false },
-          { name: 'polySurface4605_LP_set1_0', color: 0xFBFF00, flicker: false, power: 6 },
-          { name: 'base_big_LP_set2_0', color: 0x036A36, flicker: false, power: 0.04 },
+          {
+            name: 'Chrimah_Lights_3_Bulb_Blue_0',
+            color: 0x0066ff,
+            flicker: true,
+          },
+          {
+            name: 'Chrimah_Lights_3_Bulb_Yeller1_0',
+            color: 0xfbff00,
+            flicker: true,
+          },
+          {
+            name: 'Chrimah_Lights_3_Bulb_Green1_0',
+            color: 0x00ff00,
+            flicker: true,
+          },
+          {
+            name: 'Chrimah_Lights_3_Bulb_red_0',
+            color: 0xff0000,
+            flicker: true,
+          },
+          { name: 'House_1_Window_Light_0', color: 0xe78d43, flicker: false },
+          {
+            name: 'polySurface4605_LP_set1_0',
+            color: 0xfbff00,
+            flicker: false,
+            power: 6,
+          },
+          {
+            name: 'base_big_LP_set2_0',
+            color: 0x036a36,
+            flicker: false,
+            power: 0.04,
+          },
         ]}
       />
     </>

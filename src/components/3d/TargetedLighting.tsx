@@ -28,9 +28,7 @@ export default function TargetedLighting({ modelPath, targetObjects: targets }: 
         const mesh = child as Mesh
         // Vérifier si le nom de l'objet correspond à un des objets ciblés
         targets.forEach(target => {
-          console.log(mesh.name)
           if (mesh.name.includes(target.name)) {
-            console.log(`Objet trouvé: ${mesh.name} - couleur: #${target.color.toString(16)} - flicker: ${target.flicker ?? true}`)
             foundObjects.push({ mesh, target })
 
             // Modifier le matériau pour le rendre émissif avec la couleur spécifique
@@ -57,7 +55,6 @@ export default function TargetedLighting({ modelPath, targetObjects: targets }: 
     })
 
     targetMeshes.current = foundObjects
-    console.log(`${foundObjects.length} boules de Noël illuminées`)
   }, [scene, targets])
 
   // Animation optionnelle de scintillement

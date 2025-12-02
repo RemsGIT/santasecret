@@ -5,7 +5,7 @@ import type { Points} from 'three';
 export default function SnowSystem() {
   const pointsRef = useRef<Points>(null)
 
-  const particleCount = 2000
+  const particleCount = 5000
 
   // Créer les positions et vitesses des flocons
   const { positions, velocities } = useMemo(() => {

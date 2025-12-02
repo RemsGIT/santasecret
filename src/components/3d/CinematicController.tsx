@@ -87,10 +87,11 @@ export default function CinematicController() {
             )
             camera.lookAt(0, 0, 1300)
         }
-        // Fin - Position finale
+        // Phase 6 (14s+): Scène finale - Christmas Ball en mode visualisateur 3D
         else {
-            camera.position.set(0, 0, 1200)
-            camera.lookAt(0, 0, 1300)
+            // Position de caméra optimale pour visualisateur 3D
+            camera.position.set(0, 2, 8) // Légèrement au-dessus, assez près pour voir les détails
+            camera.lookAt(0, 0, 0) // Regarder directement la boule au centre
         }
     })
 
