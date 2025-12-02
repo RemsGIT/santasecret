@@ -42,6 +42,12 @@ function GalaxyModel() {
     const galaxy = useGLTF('/models/galaxy.glb')
     const galaxyRef = useRef<Group>(null)
 
+    useFrame(() => {
+        if (galaxyRef.current) {
+            galaxyRef.current.rotation.y += 0.002 // Rotation très légère, plus lente que earth
+        }
+    })
+
     return (
         <group ref={galaxyRef} position={[0, 0, 1000]} scale={[30, 30, 30]} rotation={[0, 0, 0]}>
             <primitive object={galaxy.scene.clone()} />
