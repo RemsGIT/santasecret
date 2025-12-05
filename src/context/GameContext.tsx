@@ -14,6 +14,7 @@ interface GameState {
 interface GameContextType extends GameState {
     startCinematic: (giverId: number) => void
     resetGame: () => void
+    generateNewAttributions: () => void
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined)
@@ -25,10 +26,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const [targetPerson, setTargetPerson] = useState<Person | null>(null)
     const [giverPerson, setGiverPerson] = useState<Person | null>(null)
 
-    // Auto-generate attributions on mount
+    // Load attributions from localStorage or generate new ones
     useEffect(() => {
-        const newAttributions = generateGiftAttributions(people)
-        setAttributions(newAttributions)
+        try {
+            const savedAttributions = localStorage.getItem('santasecret-attributions')
+            if (savedAttributions) {
+                const parsed = JSON.parse(savedAttributions)
+                setAttributions(parsed)
+            } else {
+                const newAttributions = generateGiftAttributions(people)
+                setAttributions(newAttributions)
+                localStorage.setItem('santasecret-attributions', JSON.stringify(newAttributions))
+            }
+        } catch (error) {
+            console.error('Error loading attributions from localStorage:', error)
+            const newAttributions = generateGiftAttributions(people)
+            setAttributions(newAttributions)
+            localStorage.setItem('santasecret-attributions', JSON.stringify(newAttributions))
+        }
     }, [])
 
     const startCinematic = useCallback((giverId: number) => {
@@ -39,6 +54,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
         const receiver = people.find(p => p.id === receiverId) || null
         const giver = people.find(p => p.id === giverId) || null
+
 
         setTargetPerson(receiver)
         setGiverPerson(giver)
@@ -53,6 +69,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
         setGiverPerson(null)
     }, [])
 
+    const generateNewAttributions = useCallback(() => {
+        const newAttributions = generateGiftAttributions(people)
+        setAttributions(newAttributions)
+        localStorage.setItem('santasecret-attributions', JSON.stringify(newAttributions))
+    }, [])
+
     return (
         <GameContext.Provider
             value={{
@@ -63,6 +85,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
                 giverPerson,
                 startCinematic,
                 resetGame,
+                generateNewAttributions,
             }}
         >
             {children}

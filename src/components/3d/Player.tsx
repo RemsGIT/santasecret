@@ -15,8 +15,7 @@ const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
   const spotLightRef = useRef<SpotLight>(null)
   const { getMovementVector, isKeyPressed } = useKeyboardControls()
   const { camera } = useThree()
-  const { cinematicActive, startCinematic } = useGame()
-  const eKeyPressedRef = useRef(false)
+  const { cinematicActive } = useGame()
 
   // Vitesse de déplacement (réduite pour éviter la téléportation)
   const speed = 0.02
@@ -67,13 +66,6 @@ const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
     if (!spotLightRef.current) return
     if (cinematicActive) return
 
-    // Détection de la touche E pour lancer la cinématique (une seule fois)
-    const eKeyPressed = isKeyPressed('KeyE')
-    if (eKeyPressed && !eKeyPressedRef.current && !cinematicActive) {
-      // Déclencher la cinématique avec un ID de joueur (1 pour test)
-      startCinematic(1)
-    }
-    eKeyPressedRef.current = eKeyPressed
 
     const { x, z } = getMovementVector()
 

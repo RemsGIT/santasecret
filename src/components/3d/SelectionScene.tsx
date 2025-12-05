@@ -1,7 +1,12 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Environment, OrbitControls, Stars } from '@react-three/drei'
+import { Environment, OrbitControls, Stars, useGLTF  } from '@react-three/drei'
 import { Vector3 } from 'three'
 import { useRef, useState } from 'react'
+import {
+  InteractionContext,
+  useInteraction,
+} from '../../context/InteractionContext'
+import { useGame } from '../../context/GameContext'
 import Player from './Player'
 import SceneMap from './SceneMap'
 import SnowSystem from './SnowSystem'
@@ -9,16 +14,9 @@ import HouseSigns from './HouseSigns'
 import TargetedLighting from './TargetedLighting'
 import CollisionSystem from './CollisionSystem'
 import Animals from './Animals'
-import NightSky from './NightSky'
 import CinematicController from './CinematicController'
 import SpaceEnvironment from './SpaceEnvironment'
 import type { Mesh } from 'three'
-import {
-  InteractionContext,
-  useInteraction,
-} from '../../context/InteractionContext'
-import { useGame } from '../../context/GameContext'
-import { useGLTF } from '@react-three/drei'
 
 // Précharger earth.glb dès le chargement du composant principal
 useGLTF.preload('/models/earth.glb')

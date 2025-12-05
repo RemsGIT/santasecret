@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Suspense, useRef, useState, useEffect } from 'react'
 import { useGame } from '../../context/GameContext'
 import type { Group } from 'three'
+import { Vector3 } from 'three'
 
 function EarthModel({ elapsed }: { elapsed: number }) {
     const earth = useGLTF('/models/earth.glb')
@@ -136,33 +137,37 @@ function TurkeyRight({ elapsed }: { elapsed: number }) {
 }
 
 function MagicTextReveal({ elapsed }: { elapsed: number }) {
+    const { targetPerson } = useGame()
     const [revealedText, setRevealedText] = useState('')
-    const fullText = "SANTA SECRET 2025"
+
+    const fullText = targetPerson ? `${targetPerson.name} 🎁` : ''
 
     useEffect(() => {
-        if (elapsed >= 16) { // Commencer la révélation 2s après l'apparition de la boule
-            const textStartTime = elapsed - 16
-            const charDelay = 0.1 // 0.1s entre chaque lettre
+        if (elapsed >= 15) { // Commencer la révélation après 15s
+            const textStartTime = elapsed - 15
+            const charDelay = 0.15 // 0.15s entre chaque lettre
             const revealedChars = Math.floor(textStartTime / charDelay)
 
             if (revealedChars <= fullText.length) {
                 setRevealedText(fullText.substring(0, revealedChars))
+            } else {
+                setRevealedText(fullText) // Texte complet
             }
         }
     }, [elapsed, fullText])
 
-    const shouldShow = elapsed >= 16
+    const shouldShow = elapsed >= 15
     if (!shouldShow) return null
 
     return (
         <Text
-            position={[0, -12, 5]}
-            fontSize={1}
-            color="#FFD700"
+            rotation={[-0.5, 0, 0]}
+            position={[0, 35, 100]}
+            fontSize={6}
+            color="#220F07"
             anchorX="center"
             anchorY="middle"
-            outlineWidth={0.05}
-            outlineColor="#8B4513"
+            outlineWidth={0.1}
         >
             {revealedText}
         </Text>
@@ -179,7 +184,7 @@ function ChristmasBallModel({ elapsed }: { elapsed: number }) {
     if (!shouldShow) return null
 
     return (
-        <group ref={ballRef} position={[0, -3, 0]} scale={[0.05, 0.05, 0.05]}>
+        <group ref={ballRef} position={[0, -3.5, 0]} scale={[0.05, 0.05, 0.05]}>
             <primitive object={scene} />
             {/* Santa qui danse à l'intérieur de la boule */}
             <SantaDanceModel elapsed={elapsed} />
@@ -211,11 +216,12 @@ export default function SpaceEnvironment() {
         const currentElapsed = (Date.now() - cinematicStartTime) / 1000
         setElapsed(currentElapsed)
 
-        // Transition progressive entre 2.5s et 3.5s pour un fade smooth de l'espace
+        // Transition douce entre scène principale et espace
         let targetSpaceOpacity = 0
-        if (currentElapsed >= 2.5 && currentElapsed < 3.5) {
-            targetSpaceOpacity = currentElapsed - 2.5 // Fade in sur 1 seconde
-        } else if (currentElapsed >= 3.5 && currentElapsed < 14) {
+        if (currentElapsed >= 1 && currentElapsed < 3) {
+            // Fade in progressif de l'espace pendant 2s
+            targetSpaceOpacity = (currentElapsed - 1) / 2
+        } else if (currentElapsed >= 3 && currentElapsed < 14) {
             targetSpaceOpacity = 1
         } else if (currentElapsed >= 14 && currentElapsed < 15) {
             // Fade out de l'espace entre 14s et 15s
@@ -253,7 +259,7 @@ export default function SpaceEnvironment() {
                     <Suspense fallback={null}>
                         <EarthModel elapsed={elapsed} />
                         <GalaxyModel />
-                    </Suspense>x
+                    </Suspense>
                 </group>
             )}
 

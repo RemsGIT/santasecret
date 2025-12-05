@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useInteraction } from '../../context/InteractionContext'
+import { useGame } from '../../context/GameContext'
 
 export default function InteractionPopup() {
     const { isNear, personName } = useInteraction()
+    const { cinematicActive } = useGame()
     const [visible, setVisible] = useState(false)
     const [shouldRender, setShouldRender] = useState(false)
 
@@ -20,7 +22,8 @@ export default function InteractionPopup() {
         }
     }, [isNear])
 
-    if (!shouldRender) return null
+    // Masquer le popup pendant la cinématique
+    if (!shouldRender || cinematicActive) return null
 
     return (
         <div
