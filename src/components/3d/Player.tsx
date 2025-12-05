@@ -129,7 +129,7 @@ const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
   return (
     <group>
       {/* Le joueur (invisible en première personne) */}
-      <mesh ref={playerRef} position={[0, 0, 0]} castShadow visible={false}>
+      <mesh ref={playerRef} position={[5, 0, 5]} castShadow visible={false}>
         <capsuleGeometry args={[0.5, 1]} />
         <meshStandardMaterial color="#4a90e2" />
       </mesh>

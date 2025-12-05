@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import SelectionScene from '../components/3d/SelectionScene'
 import { InteractionProvider } from '../context/InteractionContext'
 import InteractionPopup from '../components/ui/InteractionPopup'
+import CinematicEndPopup from '../components/ui/CinematicEndPopup'
 import { GameProvider } from '../context/GameContext'
 
 export const Route = createFileRoute('/')({ component: HomePage })
@@ -23,6 +24,7 @@ function HomePage() {
           >
             <SelectionScene />
             <InteractionPopup />
+            <CinematicEndPopup />
           </Suspense>
         </div>
       </InteractionProvider>

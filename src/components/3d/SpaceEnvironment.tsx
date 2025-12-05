@@ -174,6 +174,51 @@ function MagicTextReveal({ elapsed }: { elapsed: number }) {
     )
 }
 
+function ReturnButton({ elapsed }: { elapsed: number }) {
+    // Afficher le bouton après que le texte soit complètement révélé (environ 18s)
+    const shouldShow = elapsed >= 18
+
+    useEffect(() => {
+        if (!shouldShow) return
+
+        const handleKeyPress = (event: KeyboardEvent) => {
+            if (event.code === 'Space') {
+                window.location.reload()
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyPress)
+        return () => document.removeEventListener('keydown', handleKeyPress)
+    }, [shouldShow])
+
+    if (!shouldShow) return null
+
+    const handleReturn = () => {
+        window.location.reload()
+    }
+
+    return (
+        <Text
+            rotation={[-0.5, 0, 0]}
+            position={[0, 25, 100]}
+            fontSize={4}
+            color="#0F7A0F"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.1}
+            onClick={handleReturn}
+            onPointerOver={() => {
+                document.body.style.cursor = 'pointer'
+            }}
+            onPointerOut={() => {
+                document.body.style.cursor = 'default'
+            }}
+        >
+            Appuyez sur Espace pour revenir
+        </Text>
+    )
+}
+
 function ChristmasBallModel({ elapsed }: { elapsed: number }) {
     const { scene } = useGLTF('/models/christmas_ball-2.glb')
     const ballRef = useRef<Group>(null)
@@ -195,6 +240,7 @@ function ChristmasBallModel({ elapsed }: { elapsed: number }) {
         </group>
     )
 }
+
 
 // Précharger tous les assets pour éviter les freezes
 useGLTF.preload('/models/earth.glb')
