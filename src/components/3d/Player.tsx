@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import { Euler, Vector3 } from 'three'
 import useKeyboardControls from '../../hooks/useKeyboardControls'
-import { checkHousesCollision } from './CollisionSystem'
+import { checkHousesCollision, checkMapBounds } from './CollisionSystem'
 import type { Mesh, SpotLight } from 'three';
 import { useGame } from '../../context/GameContext'
 
@@ -88,11 +88,12 @@ const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
       const currentPos = playerRef.current.position.clone()
       const newPos = currentPos.clone().add(movement)
 
-      // Vérifier la collision avec toutes les maisons
-      const hasCollision = checkHousesCollision(newPos, houses)
+      // Vérifier la collision avec toutes les maisons et les limites de map
+      const hasHouseCollision = checkHousesCollision(newPos, houses)
+      const isOutOfBounds = checkMapBounds(newPos)
 
-      // Ne bouger que s'il n'y a pas de collision
-      if (!hasCollision) {
+      // Ne bouger que s'il n'y a pas de collision ET qu'on reste dans les limites
+      if (!hasHouseCollision && !isOutOfBounds) {
         playerRef.current.position.copy(newPos)
       }
     }

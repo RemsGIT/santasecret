@@ -71,3 +71,21 @@ export function checkHousesCollision(
 
   return false
 }
+
+export function checkMapBounds(position: Vector3): boolean {
+  // Définir les limites de la map basées sur la géométrie de scene.glb
+  // Ces valeurs peuvent être ajustées selon la taille réelle de votre map
+  const mapBounds = {
+    minX: -20,
+    maxX: 20,
+    minZ: -20,
+    maxZ: 20
+  }
+
+  return (
+    position.x < mapBounds.minX ||
+    position.x > mapBounds.maxX ||
+    position.z < mapBounds.minZ ||
+    position.z > mapBounds.maxZ
+  )
+}
