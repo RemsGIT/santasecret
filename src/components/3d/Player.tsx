@@ -17,8 +17,9 @@ const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
   const { camera } = useThree()
   const { cinematicActive } = useGame()
 
-  // Vitesse de déplacement (réduite pour éviter la téléportation)
-  const speed = 0.02
+  // Vitesses de déplacement
+  const walkSpeed = 0.02
+  const runSpeed = 0.045
 
   // Rotation de la caméra avec la souris
   const mouseRotationX = useRef(0)
@@ -71,6 +72,15 @@ const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
 
     // Déplacement relatif à la direction de la caméra avec vérification de collision
     if (x !== 0 || z !== 0) {
+      // Déterminer si on court (Espace pressé)
+      const isRunning = isKeyPressed('Space')
+      const currentSpeed = isRunning ? runSpeed : walkSpeed
+
+      // Debug temporaire
+      if (isRunning) {
+        console.log('COURSE ACTIVÉE!')
+      }
+
       // Calculer les directions avant/droite basées sur la rotation Y de la caméra
       const forward = new Vector3(0, 0, -1)
       const right = new Vector3(1, 0, 0)
@@ -81,8 +91,8 @@ const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
 
       // Calculer le vecteur de mouvement final
       const movement = new Vector3()
-      movement.add(forward.multiplyScalar(-z * speed)) // Inverser z pour un contrôle plus naturel
-      movement.add(right.multiplyScalar(x * speed))
+      movement.add(forward.multiplyScalar(-z * currentSpeed)) // Inverser z pour un contrôle plus naturel
+      movement.add(right.multiplyScalar(x * currentSpeed))
 
       // Calculer la nouvelle position potentielle
       const currentPos = playerRef.current.position.clone()

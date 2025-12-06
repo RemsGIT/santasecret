@@ -57,15 +57,15 @@ function HouseSign({ position, rotation = [0, 0, 0], personName, personId }: Hou
     if (isNear) {
       setInteraction(true, personName, personId)
     } else {
-      // Only clear if we were the one setting it? 
+      // Only clear if we were the one setting it?
       // Simpler: just clear. If we move from one to another instantly, the other will set it.
       // But to be safe, maybe we should only clear if the current interaction matches us?
-      // The context is simple. Let's just clear. 
+      // The context is simple. Let's just clear.
       // Actually, if we walk away, we want to clear.
       // If we walk into another range, that other one will set it.
       // Since they are far apart, it's fine.
       // However, if we are not near, we shouldn't necessarily clear *someone else's* interaction?
-      // But we only call this when `isNear` changes. 
+      // But we only call this when `isNear` changes.
       // If `isNear` changes from true to false, we clear.
       setInteraction(false)
     }
@@ -122,7 +122,7 @@ export default function HouseSigns() {
     rotation?: [number, number, number]
     personIndex: number
   }> = [
-      { position: [24.8, 1.5, -4.5], personIndex: 0, rotation: [0, 89.5, 0] },    // Rémy
+      { position: [14.1, 1.5, 6.7], personIndex: 0, rotation: [0, -46.1, 0] },    // Rémy
       { position: [17.2, 1.5, 0.6], personIndex: 1, rotation: [0, -45.6, 0] },   // Aurélie
       { position: [-7.9, 1.5, 12.8], personIndex: 2, rotation: [0, 90.5, 0] },   // Alexis
       { position: [-14.9, 1.5, -4.7], personIndex: 3, rotation: [0, 45.2, 0] },  // Matteo

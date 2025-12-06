@@ -10,6 +10,7 @@ interface KeyState {
   KeyA: boolean
   KeyD: boolean
   KeyE: boolean
+  Space: boolean
 }
 
 export default function useKeyboardControls() {
@@ -23,12 +24,16 @@ export default function useKeyboardControls() {
     KeyA: false,
     KeyD: false,
     KeyE: false,
+    Space: false,
   })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Debug temporaire pour voir les touches pressées
+      console.log('Touche pressée:', event.code)
+      
       if (event.code in keysRef.current) {
         keysRef.current[event.code as keyof KeyState] = true
         // Seulement prévenir pour les touches de mouvement, pas E
