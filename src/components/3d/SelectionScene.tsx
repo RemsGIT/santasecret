@@ -1,5 +1,6 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Environment, OrbitControls, Stars, useGLTF  } from '@react-three/drei'
+import { Environment, OrbitControls, Stars, useGLTF, KeyboardControls } from '@react-three/drei'
+import { Physics, RigidBody, CuboidCollider } from '@react-three/rapier'
 import { Vector3 } from 'three'
 import { useRef, useState } from 'react'
 import {
@@ -24,18 +25,29 @@ useGLTF.preload('/models/earth.glb')
 export default function SelectionScene() {
   const interactionContext = useInteraction()
   const { cinematicActive } = useGame()
+  
+  // Configuration des touches pour KeyboardControls
+  const map = [
+    { name: 'forward', keys: ['ArrowUp', 'KeyW'] },
+    { name: 'backward', keys: ['ArrowDown', 'KeyS'] },
+    { name: 'left', keys: ['ArrowLeft', 'KeyA'] },
+    { name: 'right', keys: ['ArrowRight', 'KeyD'] },
+    { name: 'run', keys: ['Shift'] },
+  ]
+
   return (
-    <Canvas
-      camera={{
-        position: [0, 3, 6],
-        fov: 100,
-        near: 0.5,
-        far: 1000,
-      }}
-      shadows
-      className="h-full w-full"
-    >
-      <InteractionContext.Provider value={interactionContext}>
+    <KeyboardControls map={map}>
+      <Canvas
+        camera={{
+          position: [0, 3, 6],
+          fov: 100,
+          near: 0.5,
+          far: 1000,
+        }}
+        shadows
+        className="h-full w-full"
+      >
+        <InteractionContext.Provider value={interactionContext}>
         {/* Environnement sombre */}
         <Environment preset="night" environmentIntensity={0.2} />
 
@@ -77,6 +89,7 @@ export default function SelectionScene() {
         <GameScene />
       </InteractionContext.Provider>
     </Canvas>
+    </KeyboardControls>
   )
 }
 
@@ -162,8 +175,15 @@ function GameScene() {
         onCollisionDataReady={setHouses}
       />
 
-      {/* Joueur avec lampe torche et collision */}
-      <Player ref={playerRef} houses={houses} />
+      {/* Physique Rapier pour le joueur */}
+      <Physics>
+        <Player ref={playerRef} houses={houses} />
+        
+        {/* Sol invisible pour éviter de tomber */}
+        <RigidBody type="fixed">
+          <CuboidCollider args={[50, 0.5, 50]} position={[0, -2, 0]} />
+        </RigidBody>
+      </Physics>
 
       {/* Éléments visibles seulement quand pas en cinématique */}
       {!cinematicActive && (
