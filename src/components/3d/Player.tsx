@@ -1,164 +1,168 @@
-import { forwardRef, useEffect, useRef } from 'react'
-import { useFrame, useThree } from '@react-three/fiber'
-import { Euler, Vector3 } from 'three'
-import useKeyboardControls from '../../hooks/useKeyboardControls'
-import { checkHousesCollision, checkMapBounds } from './CollisionSystem'
-import type { Mesh, SpotLight } from 'three';
-import { useGame } from '../../context/GameContext'
+import { useKeyboardControls } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { CapsuleCollider, RigidBody } from "@react-three/rapier";
+import { useEffect, useRef, useState } from "react";
+import { MathUtils, Vector3 } from "three";
+import { degToRad } from "three/src/math/MathUtils.js";
+import { Character } from "./Character";
 
-interface PlayerProps {
-  houses?: Mesh[]
-}
+const normalizeAngle = (angle: number) => {
+  while (angle > Math.PI) angle -= 2 * Math.PI;
+  while (angle < -Math.PI) angle += 2 * Math.PI;
+  return angle;
+};
 
-const Player = forwardRef<Mesh, PlayerProps>(({ houses = [] }, ref) => {
-  const playerRef = ref as React.RefObject<Mesh>
-  const spotLightRef = useRef<SpotLight>(null)
-  const { getMovementVector, isKeyPressed } = useKeyboardControls()
-  const { camera } = useThree()
-  const { cinematicActive } = useGame()
+const lerpAngle = (start: number, end: number, t: number) => {
+  start = normalizeAngle(start);
+  end = normalizeAngle(end);
 
-  // Vitesse de déplacement (réduite pour éviter la téléportation)
-  const speed = 0.02
+  if (Math.abs(end - start) > Math.PI) {
+    if (end > start) {
+      start += 2 * Math.PI;
+    } else {
+      end += 2 * Math.PI;
+    }
+  }
 
-  // Rotation de la caméra avec la souris
-  const mouseRotationX = useRef(0)
-  const mouseRotationY = useRef(0)
-  const isPointerLocked = useRef(false)
+  return normalizeAngle(start + (end - start) * t);
+};
+
+const Player = () => {
+  const WALK_SPEED = 0.8;
+  const RUN_SPEED = 1.6;
+  const ROTATION_SPEED = degToRad(0.5);
+
+  const rb = useRef();
+  const container = useRef();
+  const character = useRef();
+
+  const [animation, setAnimation] = useState("idle");
+
+  const characterRotationTarget = useRef(0);
+  const rotationTarget = useRef(0);
+  const cameraTarget = useRef();
+  const cameraPosition = useRef();
+  const cameraWorldPosition = useRef(new Vector3());
+  const cameraLookAtWorldPosition = useRef(new Vector3());
+  const cameraLookAt = useRef(new Vector3());
+  const [, get] = useKeyboardControls();
+  const isClicking = useRef(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const handleMouseMove = (event: MouseEvent) => {
-      if (!isPointerLocked.current) return
-
-      const sensitivity = 0.002
-      mouseRotationY.current -= event.movementX * sensitivity
-      mouseRotationX.current -= event.movementY * sensitivity
-
-      // Limiter la rotation verticale
-      mouseRotationX.current = Math.max(
-        -Math.PI / 2,
-        Math.min(Math.PI / 2, mouseRotationX.current),
-      )
-    }
-
-    // Verrouiller le pointeur au clic
-    const handleClick = async () => {
-      await document.body.requestPointerLock()
-    }
-
-    const handlePointerLockChange = () => {
-      isPointerLocked.current = document.pointerLockElement === document.body
-    }
-
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('click', handleClick)
-    document.addEventListener('pointerlockchange', handlePointerLockChange)
-
+    const onMouseDown = (e: MouseEvent) => {
+      isClicking.current = true;
+    };
+    const onMouseUp = (e: MouseEvent) => {
+      isClicking.current = false;
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("mouseup", onMouseUp);
+    // touch
+    document.addEventListener("touchstart", onMouseDown);
+    document.addEventListener("touchend", onMouseUp);
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('click', handleClick)
-      document.removeEventListener('pointerlockchange', handlePointerLockChange)
-    }
-  }, [])
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("touchstart", onMouseDown);
+      document.removeEventListener("touchend", onMouseUp);
+    };
+  }, []);
 
-  useFrame(() => {
-    if (!spotLightRef.current) return
-    if (cinematicActive) return
+  useFrame(({ camera, mouse }) => {
+    if (rb.current) {
+      const vel = rb.current.linvel();
 
+      const movement = {
+        x: 0,
+        z: 0,
+      };
 
-    const { x, z } = getMovementVector()
-
-    // Déplacement relatif à la direction de la caméra avec vérification de collision
-    if (x !== 0 || z !== 0) {
-      // Calculer les directions avant/droite basées sur la rotation Y de la caméra
-      const forward = new Vector3(0, 0, -1)
-      const right = new Vector3(1, 0, 0)
-
-      // Appliquer seulement la rotation horizontale (Y) pour le déplacement
-      forward.applyAxisAngle(new Vector3(0, 1, 0), mouseRotationY.current)
-      right.applyAxisAngle(new Vector3(0, 1, 0), mouseRotationY.current)
-
-      // Calculer le vecteur de mouvement final
-      const movement = new Vector3()
-      movement.add(forward.multiplyScalar(-z * speed)) // Inverser z pour un contrôle plus naturel
-      movement.add(right.multiplyScalar(x * speed))
-
-      // Calculer la nouvelle position potentielle
-      const currentPos = playerRef.current.position.clone()
-      const newPos = currentPos.clone().add(movement)
-
-      // Vérifier la collision avec toutes les maisons et les limites de map
-      const hasHouseCollision = checkHousesCollision(newPos, houses)
-      const isOutOfBounds = checkMapBounds(newPos)
-
-      // Ne bouger que s'il n'y a pas de collision ET qu'on reste dans les limites
-      if (!hasHouseCollision && !isOutOfBounds) {
-        playerRef.current.position.copy(newPos)
+      if (get().forward) {
+        movement.z = 1;
       }
+      if (get().backward) {
+        movement.z = -1;
+      }
+
+      let speed = get().run ? RUN_SPEED : WALK_SPEED;
+
+      if (isClicking.current) {
+        console.log("clicking", mouse.x, mouse.y);
+        if (Math.abs(mouse.x) > 0.1) {
+          movement.x = -mouse.x;
+        }
+        movement.z = mouse.y + 0.4;
+        if (Math.abs(movement.x) > 0.5 || Math.abs(movement.z) > 0.5) {
+          speed = RUN_SPEED;
+        }
+      }
+
+      if (get().left) {
+        movement.x = 1;
+      }
+      if (get().right) {
+        movement.x = -1;
+      }
+
+      if (movement.x !== 0) {
+        rotationTarget.current += ROTATION_SPEED * movement.x;
+      }
+
+      if (movement.x !== 0 || movement.z !== 0) {
+        characterRotationTarget.current = Math.atan2(movement.x, movement.z);
+        vel.x =
+          Math.sin(rotationTarget.current + characterRotationTarget.current) *
+          speed;
+        vel.z =
+          Math.cos(rotationTarget.current + characterRotationTarget.current) *
+          speed;
+        if (speed === RUN_SPEED) {
+          setAnimation("run");
+        } else {
+          setAnimation("walk");
+        }
+      } else {
+        setAnimation("idle");
+      }
+      character.current.rotation.y = lerpAngle(
+        character.current.rotation.y,
+        characterRotationTarget.current,
+        0.1
+      );
+
+      rb.current.setLinvel(vel, true);
     }
 
-    // Caméra en première personne - suit simplement le joueur
-    const playerPos = playerRef.current.position
-    camera.position.set(playerPos.x, playerPos.y + 1.6, playerPos.z)
+    // CAMERA
+    container.current.rotation.y = MathUtils.lerp(
+      container.current.rotation.y,
+      rotationTarget.current,
+      0.1
+    );
 
-    // Rotation de la caméra avec la souris
-    camera.rotation.order = 'YXZ'
-    camera.rotation.y = mouseRotationY.current
-    camera.rotation.x = mouseRotationX.current
+    cameraPosition.current.getWorldPosition(cameraWorldPosition.current);
+    camera.position.lerp(cameraWorldPosition.current, 0.1);
 
-    // Lampe torche suit la caméra
-    spotLightRef.current.position.set(
-      camera.position.x,
-      camera.position.y - 0.2,
-      camera.position.z,
-    )
+    if (cameraTarget.current) {
+      cameraTarget.current.getWorldPosition(cameraLookAtWorldPosition.current);
+      cameraLookAt.current.lerp(cameraLookAtWorldPosition.current, 0.1);
 
-    // Calculer la direction de la lampe torche basée sur la rotation de la caméra
-    const direction = new Vector3(0, 0, -1)
-    direction.applyEuler(
-      new Euler(mouseRotationX.current, mouseRotationY.current, 0, 'YXZ'),
-    )
-
-    const targetPosition = camera.position
-      .clone()
-      .add(direction.multiplyScalar(20))
-    spotLightRef.current.target.position.copy(targetPosition)
-    spotLightRef.current.target.updateMatrixWorld()
-  })
+      camera.lookAt(cameraLookAt.current);
+    }
+  });
 
   return (
-    <group>
-      {/* Le joueur (invisible en première personne) */}
-      <mesh ref={playerRef} position={[5, 0, 5]} castShadow visible={false}>
-        <capsuleGeometry args={[0.5, 1]} />
-        <meshStandardMaterial color="#4a90e2" />
-      </mesh>
+    <RigidBody colliders={false} lockRotations ref={rb}>
+      <group ref={container}>
+        <group ref={cameraTarget} position-z={1.5} />
+        <group ref={cameraPosition} position-y={4} position-z={-4} />
+        <group ref={character}>
+          <Character scale={0.3} position-y={2} animation={animation} />
+        </group>
+      </group>
+      <CapsuleCollider args={[0.08, 0.15]} />
+    </RigidBody>
+  );
+};
 
-      {/* Lampe torche - SpotLight avec plus de portée */}
-      <spotLight
-        ref={spotLightRef}
-        intensity={30}
-        angle={Math.PI / 8} // Cône légèrement plus large
-        penumbra={0.4} // Transition douce des bords
-        distance={40} // Portée plus importante
-        decay={1.8} // Atténuation moins agressive
-        color="#fff8dc" // Couleur blanc chaud
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-camera-near={0.1}
-        shadow-camera-far={30}
-        shadow-bias={-0.0001}
-      />
-
-      {/* Target invisible pour la direction de la lampe */}
-      <mesh position={[0, 0, -5]} visible={false}>
-        <boxGeometry args={[0.1, 0.1, 0.1]} />
-      </mesh>
-    </group>
-  )
-})
-
-Player.displayName = 'Player'
-
-export default Player
+export default Player;
